@@ -74,6 +74,10 @@ jobs:
       - name: Log in to Docker Hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Set up environment variable
+        run: |
+          echo "DOCKER_REPO=kimtjrgus" >> $GITHUB_ENV
+          
       - name: Build Docker image
         run: docker build -f ./server/Dockerfile -t ${{ secrets.DOCKER_REPO }}/salog .
 
