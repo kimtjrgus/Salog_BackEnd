@@ -77,6 +77,9 @@ jobs:
       - name: Build Docker image
         run: docker build -f ./server/Dockerfile -t ${{ secrets.DOCKER_REPO }}/salog .
 
+      - name: Print Docker Repo
+        run: echo "Docker Repo: ${{ secrets.DOCKER_REPO }}"
+
       - name: Push Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_REPO }}/salog
 
