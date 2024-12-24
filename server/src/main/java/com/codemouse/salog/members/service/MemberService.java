@@ -109,12 +109,6 @@ public class MemberService {
     public void deleteMember(String token) {
         Member findMember = findVerifiedMember(jwtTokenizer.getMemberId(token));
 
-        for (LedgerTag tag : findMember.getLedgerTags()) {
-            tag.setMember(null);
-        }
-
-        findMember.setLedgerTags(null);
-
         memberRepository.delete(findMember);
     }
 
