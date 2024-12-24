@@ -64,7 +64,7 @@ public class Member extends Auditable {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MonthlyBudget> monthlyBudgets;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<LedgerTag> ledgerTags;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
