@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @Slf4j
+//@EnableCaching
 public class IncomeService {
     private final IncomeRepository incomeRepository;
     private final IncomeMapper incomeMapper;
@@ -44,7 +46,7 @@ public class IncomeService {
     private final LedgerTagService tagService;
     private final Validator validator;
 
-    @CacheEvict(value = "getIncomes", allEntries = true)
+//    @CacheEvict(value = "getIncomes", allEntries = true)
     public IncomeDto.Response createIncome(String token, IncomeDto.Post incomePostDto) {
         Income income = incomeMapper.incomePostDtoToIncome(incomePostDto);
 
@@ -57,7 +59,7 @@ public class IncomeService {
         return incomeMapper.incomeToIncomeResponseDto(savedIncome);
     }
 
-    @CacheEvict(value = "getIncomes", allEntries = true)
+//    @CacheEvict(value = "getIncomes", allEntries = true)
     public IncomeDto.Response updateIncome(String token, long incomeId, IncomeDto.Patch incomePatchDto) {
 
         Income income = incomeMapper.incomePatchDtoToIncome(incomePatchDto);
@@ -78,7 +80,20 @@ public class IncomeService {
         return incomeMapper.incomeToIncomeResponseDto(savedIncome);
     }
 
-    @Cacheable(value = "getIncomes", key = "#memberId + '_' + #page + '_' + #size + '_' + #incomeTag + '_' + #date")
+//    @Cacheable(value = "getIncomes", key = "#memberId + '_' + #page + '_' + #size + '_' + #incomeTag + '_' + #date")
+    /*
+    @Cacheable 이 어노테이션의 사용법을 잘 못 알아서 주석 캐싱 기능을 주석 처리함
+    위 어노테이션은 각 캐시 키를 적용된 메서드의 매개변수로 부터 받아오게 됨
+    즉, 현재 getIncomes 메서드의 매개변수를 token이 아니라 memberId로 수정하면 회원의 식별자로 캐시 키가 정상적으로 만들어짐
+
+    현재 방식대로라면 A 회원이 수입을 조회한 경우 해당 정보가 캐시 메모리에 저장되는데 문제는 memeberId가 null 인 상태이기 때문에
+    나머지 page, size, tag, date로 캐시 키가 생성되고, 이로 인해 가장 처음 수입을 조회한 회원의 정보가 캐시 메모리에 저장됨
+    그래서 다른 모든 회원이 동일한 page, size, tag, date를 입력해서 수입 조회를 요청하면 해당 캐시 메모리에 있는 데이터를 요청하게 되는 것
+
+    이를 해결하기 위해 컨트롤러에서 부터 token을 memberId로 변환하고 서비스의 조회 메서드에서 memberId를 메개변수로 반아오게 하고,
+    이외에 getIncomes 메서드를 사용하는 Calendar 클래스에서도 JwtTokenizer 를 주입하고 구조를 변경해야함
+    하지만 getIncomes 메서드만 그렇게 수정하기에는 전체 구조가 일관성이 없기 때문에 현재 캐싱 기능을 비활성화 함
+    */
     public MultiResponseDto<IncomeDto.Response> getIncomes(String token, int page, int size, String incomeTag, String date) {
         long memberId = jwtTokenizer.getMemberId(token);
 
@@ -152,7 +167,7 @@ public class IncomeService {
         );
     }
 
-    @CacheEvict(value = "getIncomes", allEntries = true)
+//    @CacheEvict(value = "getIncomes", allEntries = true)
     public void deleteIncome(String token, long incomeId) {
 
         Income income = findVerifiedIncome(incomeId);
