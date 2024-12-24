@@ -108,6 +108,7 @@ public class MemberService {
         Member findMember = findVerifiedMember(jwtTokenizer.getMemberId(token));
 
         findMember.setLedgerTags(null);
+        findMember.setDiaryTags(null);
 
         memberRepository.delete(findMember);
     }
