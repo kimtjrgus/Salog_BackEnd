@@ -112,12 +112,8 @@ public class MemberService {
         for (LedgerTag tag : findMember.getLedgerTags()) {
             tag.setMember(null);
         }
-        for (DiaryTag tag : findMember.getDiaryTags()) {
-            tag.setMember(null);
-        }
 
         findMember.setLedgerTags(null);
-        findMember.setDiaryTags(null);
 
         memberRepository.delete(findMember);
     }
