@@ -11,6 +11,7 @@ import com.codemouse.salog.members.entity.Member;
 import com.codemouse.salog.members.mapper.MemberMapper;
 import com.codemouse.salog.members.repository.MemberRepository;
 import com.codemouse.salog.members.service.MemberService;
+import com.codemouse.salog.tags.ledgerTags.entity.LedgerTag;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -308,6 +310,10 @@ public class MemberServiceTest {
         member.setPassword("testPassword");
         member.setEmailAlarm(true);
         member.setEmailAlarm(true);
+
+        LedgerTag tag = new LedgerTag();
+        tag.setMember(member);
+        member.setLedgerTags(List.of(tag));
 
         when(jwtTokenizer.getMemberId(token)).thenReturn(1L);
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));

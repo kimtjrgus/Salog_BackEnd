@@ -1,8 +1,13 @@
 package com.codemouse.salog.members.entity;
 
 import com.codemouse.salog.audit.Auditable;
+import com.codemouse.salog.diary.entity.Diary;
+import com.codemouse.salog.ledger.budget.entity.MonthlyBudget;
+import com.codemouse.salog.ledger.fixedIncome.entity.FixedIncome;
+import com.codemouse.salog.ledger.fixedOutgo.entity.FixedOutgo;
 import com.codemouse.salog.ledger.income.entity.Income;
 import com.codemouse.salog.ledger.outgo.entity.Outgo;
+import com.codemouse.salog.tags.diaryTags.entity.DiaryTag;
 import com.codemouse.salog.tags.ledgerTags.entity.LedgerTag;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,8 +45,30 @@ public class Member extends Auditable {
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member")
+    // cascade
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Income> incomes;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Outgo> outgos;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<FixedIncome> fixedIncomes;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<FixedOutgo> fixedOutgos;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Diary> diaries;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<MonthlyBudget> monthlyBudgets;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<LedgerTag> ledgerTags;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<DiaryTag> diaryTags;
 
 
 //    public enum Status {

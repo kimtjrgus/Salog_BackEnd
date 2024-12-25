@@ -10,6 +10,8 @@ import com.codemouse.salog.members.dto.MemberDto;
 import com.codemouse.salog.members.entity.Member;
 import com.codemouse.salog.members.mapper.MemberMapper;
 import com.codemouse.salog.members.repository.MemberRepository;
+import com.codemouse.salog.tags.diaryTags.entity.DiaryTag;
+import com.codemouse.salog.tags.ledgerTags.entity.LedgerTag;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
