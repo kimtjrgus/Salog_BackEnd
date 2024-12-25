@@ -161,6 +161,7 @@ public class OutgoService {
     }
 
     // DELETE
+    @Transactional
     public void deleteOutgo (String token, long outgoId){
         log.info("Outgo delete requested - token: {}, outgoId: {}", token, outgoId);
         tokenBlackListService.isBlackListed(token);
@@ -170,15 +171,16 @@ public class OutgoService {
 
         LedgerTag ledgerTag = findOutgo.getLedgerTag();
 
-        // 연결된 태그가 있는 경우, 연결을 끊어줌
-        findOutgo.setLedgerTag(null);
+        outgoRepository.delete(findOutgo);
 
         // 삭제하려는 지출에만 연결된 태그인 경우, 태그 삭제
         if (ledgerTag != null && ledgerTag.getOutgos().size() == 1) {
             ledgerTagService.deleteLedgerTag(token, ledgerTag.getLedgerTagId());
         }
-
-        outgoRepository.delete(findOutgo);
+        else {
+            // 연결된 태그가 있는 경우, 지출과 태그의 연결만을 끊음
+            findOutgo.setLedgerTag(null);
+        }
 
         log.info("Outgo successfully deleted - memberId: {}, outgoId: {}", jwtTokenizer.getMemberId(token), outgoId);
     }
