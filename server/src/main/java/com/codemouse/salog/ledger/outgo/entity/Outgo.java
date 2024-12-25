@@ -44,6 +44,6 @@ public class Outgo {
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "LEDGER_TAG_ID")
+    @JoinColumn(name = "LEDGER_TAG_ID", nullable = false)
     private LedgerTag ledgerTag;
 }
