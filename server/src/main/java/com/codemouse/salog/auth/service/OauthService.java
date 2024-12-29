@@ -120,6 +120,8 @@ public class OauthService {
             member.setPassword(null);
             member.setHomeAlarm(false);
             member.setEmailAlarm(false);
+            // 소셜 회원 분류
+            member.setSocial_type(Member.Social_type.GOOGLE);
 
             // 권한
             List<String> roles = authorityUtils.createRoles(member.getEmail());

@@ -1,5 +1,6 @@
 package com.codemouse.salog.members.dto;
 
+import com.codemouse.salog.members.entity.Member;
 import com.codemouse.salog.tags.ledgerTags.dto.LedgerTagDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -57,6 +58,7 @@ public class MemberDto {
         private String email;
         private boolean emailAlarm;
         private boolean homeAlarm;
+        private Member.Social_type social_type;
         private LocalDateTime createdAt;
         private List<LedgerTagDto.Response> incomeTags;
         private List<LedgerTagDto.Response> outgoTags;
