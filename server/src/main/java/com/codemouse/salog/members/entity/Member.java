@@ -37,6 +37,12 @@ public class Member extends Auditable {
     @Column(nullable = false)
     private boolean homeAlarm;
 
+    // 소셜 회원 분류
+    // 재사용 용이하게 Enum
+    @Enumerated(value = EnumType.STRING)
+    @Column
+    private Social_type social_type = null;
+
 //    @Enumerated(value = EnumType.STRING)
 //    @Column(nullable = false)
 //    private Status status = Status.MEMBER_ACTIVE;
@@ -82,4 +88,17 @@ public class Member extends Auditable {
 //            this.status = status;
 //        }
 //    }
+
+    public enum Social_type {
+        GOOGLE("구글 회원"),
+        NAVER("네이버 회원"),
+        KAKAO("카카오 회원");
+
+        @Getter
+        private final String social_type;
+
+        Social_type(String social_type) {
+            this.social_type = social_type;
+        }
+    }
 }
