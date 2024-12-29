@@ -90,6 +90,7 @@ public class MemberIntegrationTest {
         member.setPassword(passwordEncoder.encode("1234qwer!@#$"));
         member.setEmailAlarm(false);
         member.setHomeAlarm(false);
+        member.setSocial_type(null);
         member.setRoles(List.of("USER"));
         member.setLedgerTags(Collections.emptyList());
         memberRepository.save(member);
@@ -455,6 +456,7 @@ public class MemberIntegrationTest {
                 .andExpect(jsonPath("$.data.email").value(member.getEmail()))
                 .andExpect(jsonPath("$.data.emailAlarm").value(member.isEmailAlarm()))
                 .andExpect(jsonPath("$.data.homeAlarm").value(member.isHomeAlarm()))
+                .andExpect(jsonPath("$.data.social_type").value(member.getSocial_type()))
                 .andExpect(jsonPath("$.data.incomeTags", hasSize(0)))
                 .andExpect(jsonPath("$.data.outgoTags", hasSize(0)))
                 .andDo(print())
@@ -471,6 +473,7 @@ public class MemberIntegrationTest {
                                 fieldWithPath("data.email").description("회원 이메일"),
                                 fieldWithPath("data.homeAlarm").description("웹 페이지 고정 지출 알람"),
                                 fieldWithPath("data.emailAlarm").description("이메일 고정 지출 알람"),
+                                fieldWithPath("data.social_type").description("소셜 로그인 분류 (Google / Naver / Kakao)"),
                                 fieldWithPath("data.createdAt").description("계정 생성 일시"),
                                 fieldWithPath("data.incomeTags").description("수입 태그 목록"),
                                 fieldWithPath("data.outgoTags").description("지출 태그 목록")
