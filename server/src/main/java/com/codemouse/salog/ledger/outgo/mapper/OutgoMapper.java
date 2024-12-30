@@ -9,9 +9,9 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", uses = LedgerTagMapper.class, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface OutgoMapper {
-    Outgo OutgoPostDtoToOutgo(OutgoDto.Post requestBody);
-    Outgo OutgoPatchDtoToOutgo(OutgoDto.Patch requestBody);
+    Outgo outgoPostDtoToOutgo(OutgoDto.Post requestBody);
+    Outgo outgoPatchDtoToOutgo(OutgoDto.Patch requestBody);
 
     @Mapping(source = "ledgerTag", target = "outgoTag", qualifiedByName = "ledgerTagToLedgerTagResponseDto")
-    OutgoDto.Response OutgoToOutgoResponseDto(Outgo outgo);
+    OutgoDto.Response outgoToOutgoResponseDto(Outgo outgo);
 }

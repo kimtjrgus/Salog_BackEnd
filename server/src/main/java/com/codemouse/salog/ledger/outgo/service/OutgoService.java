@@ -50,16 +50,16 @@ public class OutgoService {
 
     // POST
     @Transactional
-    public OutgoDto.Response postOutgo (String token, OutgoDto.Post outgoDTO){
+    public OutgoDto.Response createOutgo (String token, OutgoDto.Post outgoDTO){
         tokenBlackListService.isBlackListed(token);
 
         Member member = memberService.findVerifiedMember(jwtTokenizer.getMemberId(token));
-        Outgo outgo = outgoMapper.OutgoPostDtoToOutgo(outgoDTO);
+        Outgo outgo = outgoMapper.outgoPostDtoToOutgo(outgoDTO);
         outgo.setMember(member);
         // 태그 생성 로직
         Outgo savedOutgo = tagHandler(outgoDTO.getOutgoTag(), token, outgo);
 
-        return outgoMapper.OutgoToOutgoResponseDto(savedOutgo);
+        return outgoMapper.outgoToOutgoResponseDto(savedOutgo);
     }
 
     // PATCH
@@ -67,7 +67,7 @@ public class OutgoService {
     public OutgoDto.Response patchOutgo (String token, long outgoId, OutgoDto.Patch outgoDto){
         tokenBlackListService.isBlackListed(token);
 
-        Outgo outgo = outgoMapper.OutgoPatchDtoToOutgo(outgoDto);
+        Outgo outgo = outgoMapper.outgoPatchDtoToOutgo(outgoDto);
         Outgo findOutgo = findVerifiedOutgo(outgoId);
         memberService.verifiedRequest(token, findOutgo.getMember().getMemberId());
 
@@ -81,7 +81,7 @@ public class OutgoService {
 
         Outgo savedOutgo = tagHandler(outgoDto.getOutgoTag(), token, findOutgo);
 
-        return outgoMapper.OutgoToOutgoResponseDto(savedOutgo);
+        return outgoMapper.outgoToOutgoResponseDto(savedOutgo);
     }
 
     // GET All List
@@ -92,7 +92,7 @@ public class OutgoService {
         Page<Outgo> outgoPage = findOutgoPages(token, page, size, date, outgoTag, null);
 
         List<OutgoDto.Response> outgoDtoList = outgoPage.getContent().stream()
-                .map(outgoMapper::OutgoToOutgoResponseDto)
+                .map(outgoMapper::outgoToOutgoResponseDto)
                 .collect(Collectors.toList());
 
         return new MultiResponseDto<>(outgoDtoList, outgoPage);
@@ -104,7 +104,7 @@ public class OutgoService {
         Page<Outgo> wastePage = findOutgoPages(token, page, size, date, outgoTag, true);
 
         List<OutgoDto.Response> wasteDtoList = wastePage.getContent().stream()
-                .map(outgoMapper::OutgoToOutgoResponseDto)
+                .map(outgoMapper::outgoToOutgoResponseDto)
                 .collect(Collectors.toList());
 
         return new MultiResponseDto<>(wasteDtoList, wastePage);
@@ -285,7 +285,7 @@ public class OutgoService {
     public List<OutgoDto.Response> findOutgoPagesAsList(String token, int page, int size, String date, String outgoTag, Boolean isWasteList){
         Page<Outgo> outgoPage = findOutgoPages(token, page, size, date, outgoTag, isWasteList);
         return outgoPage.getContent().stream()
-                .map(outgoMapper::OutgoToOutgoResponseDto)
+                .map(outgoMapper::outgoToOutgoResponseDto)
                 .collect(Collectors.toList());
     }
 
