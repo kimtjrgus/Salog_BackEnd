@@ -325,9 +325,9 @@ public class IncomeIntegrationTest {
     }
 
     @Test
-    @DisplayName("수입 생성 실패 : 태그가 유효성 검증에 실패하는 경우")
+    @DisplayName("수입 생성 실패 1 : 태그가 유효성 검증에 실패하는 경우")
     @Order(4)
-    void postIncomeTest_Fail() throws Exception {
+    void postIncomeTest_Fail1() throws Exception {
         // given
         IncomeDto.Post postDto = new IncomeDto.Post(
                 10000, "testName", "testMemo", LocalDate.of(2024, 1, 1),
@@ -356,7 +356,7 @@ public class IncomeIntegrationTest {
                 .andDo(print())
 
                 // documentation
-                .andDo(document("IncomeIntegrationTest/postIncomeTest_Fail",
+                .andDo(document("IncomeIntegrationTest/postIncomeTest_Fail1",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
@@ -382,8 +382,62 @@ public class IncomeIntegrationTest {
     }
 
     @Test
-    @DisplayName("수입 수정 성공 1 : 태그가 null 인 경우")
+    @DisplayName("수입 생성 실패 2 : 연도가 유효하지 않은 경우 (100년 제한)")
     @Order(5)
+    void postIncomeTest_Fail2() throws Exception {
+        // given
+        IncomeDto.Post postDto = new IncomeDto.Post(
+                10000, "testName", "testMemo", LocalDate.of(1920, 1, 1),
+                "testTag"
+        );
+
+        // LocalDate 커스텀 직렬화
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new LocalDateSerializer())
+                .create();
+
+        String content = gson.toJson(postDto);
+
+        // when
+        mockMvc.perform(
+                        post("/income/post")
+                                .header("Authorization", token)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                                .content(content)
+                )
+
+                // then
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/postIncomeTest_Fail2",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestFields(
+                                fieldWithPath("money").description("수입 금액"),
+                                fieldWithPath("incomeName").description("수입명"),
+                                fieldWithPath("memo").description("수입에 대한 간단한 메모"),
+                                fieldWithPath("date").description("수입 날짜"),
+                                fieldWithPath("incomeTag").description("수입 태그 이름")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").description("상태 코드"),
+                                fieldWithPath("message").description("상태 메시지"),
+                                fieldWithPath("fieldErrors").description("입력 필드 에러 목록"),
+                                fieldWithPath("violationErrors").description("규칙 위반 목록")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("수입 수정 성공 1 : 태그가 null 인 경우")
+    @Order(6)
     void updateIncomeTest_Success1() throws Exception {
         // given
         IncomeDto.Patch patchDto = new IncomeDto.Patch(
@@ -436,7 +490,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 수정 성공 2 : 태그가 존재하지 않는 경우")
-    @Order(6)
+    @Order(7)
     void updateIncomeTest_Success2() throws Exception {
         // given
         IncomeDto.Patch patchDto = new IncomeDto.Patch(
@@ -487,7 +541,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 수정 성공 3 : 태그가 이미 존재하는 경우")
-    @Order(7)
+    @Order(8)
     void updateIncomeTest_Success3() throws Exception {
         // given
         LedgerTag tag = new LedgerTag();
@@ -547,7 +601,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 수정 실패 1 : 태그가 유효성 검증에 실패하는 경우")
-    @Order(8)
+    @Order(9)
     void updateIncomeTest_Fail1() throws Exception {
         // given
         IncomeDto.Patch patchDto = new IncomeDto.Patch(
@@ -597,7 +651,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 수정 실패 2 : 수입이 존재하지 않는 경우")
-    @Order(9)
+    @Order(10)
     void updateIncomeTest_Fail2() throws Exception {
         // given
         IncomeDto.Patch patchDto = new IncomeDto.Patch(
@@ -643,7 +697,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 조회 성공 1 : 태그가 없고 일자가 유효한 경우 (일별 조회)")
-    @Order(10)
+    @Order(11)
     void getAllIncomesTest_Success1() throws Exception {
         // when
         mockMvc.perform(
@@ -691,7 +745,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 조회 성공 2 : 태그가 없고 일자가 00인 경우 (월별 조회)")
-    @Order(11)
+    @Order(12)
     void getAllIncomesTest_Success2() throws Exception {
         // when
         mockMvc.perform(
@@ -739,7 +793,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 조회 성공 3 : 태그가 있고 일자가 유효한 경우 (일별 조회)")
-    @Order(12)
+    @Order(13)
     void getAllIncomesTest_Success3() throws Exception {
         // given
         LedgerTag tag = new LedgerTag();
@@ -804,7 +858,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 조회 성공 4 : 태그가 있고 일자가 00인 경우 (월별 조회)")
-    @Order(13)
+    @Order(14)
     void getAllIncomesTest_Success4() throws Exception {
         // given
         LedgerTag tag = new LedgerTag();
@@ -869,7 +923,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 조회 실패 1 : 월자가 유효하지 않은 경우")
-    @Order(14)
+    @Order(15)
     void getAllIncomesTest_Fail1() throws Exception {
         // given
         incomeRepository.deleteAll();
@@ -880,7 +934,7 @@ public class IncomeIntegrationTest {
                                 .header("Authorization", token)
                                 .param("page", "1")
                                 .param("size", "5")
-                                .param("date", "2024-123-01")
+                                .param("date", "2024-14-01")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .characterEncoding("UTF-8")
                 )
@@ -912,7 +966,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 조회 실패 2 : 일자가 유효하지 않은 경우")
-    @Order(15)
+    @Order(16)
     void getAllIncomesTest_Fail2() throws Exception {
         // given
         incomeRepository.deleteAll();
@@ -923,7 +977,7 @@ public class IncomeIntegrationTest {
                                 .header("Authorization", token)
                                 .param("page", "1")
                                 .param("size", "5")
-                                .param("date", "2024-01-123")
+                                .param("date", "2024-01-35")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .characterEncoding("UTF-8")
                 )
@@ -954,8 +1008,516 @@ public class IncomeIntegrationTest {
     }
 
     @Test
+    @DisplayName("수입 조회 실패 3 : 날짜 형식이 유효하지 않은 경우")
+    @Order(17)
+    void getAllIncomesTest_Fail3() throws Exception {
+        // given
+        incomeRepository.deleteAll();
+
+        // when
+        mockMvc.perform(
+                        get("/income")
+                                .header("Authorization", token)
+                                .param("page", "1")
+                                .param("size", "5")
+                                .param("date", "-2024-01-01")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getAllIncomesTest_Fail3",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("date").description("조회 날짜 (유효하지 않음)")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").description("상태 코드"),
+                                fieldWithPath("message").description("상태 메시지"),
+                                fieldWithPath("fieldErrors").description("입력 필드 에러 목록"),
+                                fieldWithPath("violationErrors").description("규칙 위반 목록")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("수입 날짜 범위 조회 성공 1 : 연 단위")
+    @Order(18)
+    void getIncomesByDateRangeTest_Success1() throws Exception {
+        // when
+        mockMvc.perform(
+                        get("/income/range")
+                                .header("Authorization", token)
+                                .param("page", "1")
+                                .param("size", "5")
+                                .param("startDate", "2023-01-01")
+                                .param("endDate", "2024-01-01")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isOk())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getIncomesByDateRangeTest_Success1",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("startDate").description("시작 조회 날짜"),
+                                parameterWithName("endDate").description("종료 조회 날짜")
+                        ),
+                        responseFields(
+                                fieldWithPath("data").description("데이터 목록"),
+                                fieldWithPath("data[].incomeId").description("수입 식별자"),
+                                fieldWithPath("data[].money").description("수입 금액"),
+                                fieldWithPath("data[].incomeName").description("수입명"),
+                                fieldWithPath("data[].memo").description("수입에 대한 간단한 메모"),
+                                fieldWithPath("data[].date").description("수입 날짜"),
+                                fieldWithPath("data[].incomeTag").description("수입 태그").optional().type(JsonFieldType.NULL),
+                                fieldWithPath("pageInfo").description("페이지 정보"),
+                                fieldWithPath("pageInfo.pageNumber").description("현재 페이지 번호"),
+                                fieldWithPath("pageInfo.pageSize").description("페이지 크기"),
+                                fieldWithPath("pageInfo.totalElements").description("총 요소 수"),
+                                fieldWithPath("pageInfo.totalPages").description("전체 페이지 수")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("수입 날짜 범위 조회 성공 2 : 월 단위")
+    @Order(19)
+    void getIncomesByDateRangeTest_Success2() throws Exception {
+        // when
+        mockMvc.perform(
+                        get("/income/range")
+                                .header("Authorization", token)
+                                .param("page", "1")
+                                .param("size", "5")
+                                .param("startDate", "2024-01-01")
+                                .param("endDate", "2024-02-01")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isOk())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getIncomesByDateRangeTest_Success2",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("startDate").description("시작 조회 날짜"),
+                                parameterWithName("endDate").description("종료 조회 날짜")
+                        ),
+                        responseFields(
+                                fieldWithPath("data").description("데이터 목록"),
+                                fieldWithPath("data[].incomeId").description("수입 식별자"),
+                                fieldWithPath("data[].money").description("수입 금액"),
+                                fieldWithPath("data[].incomeName").description("수입명"),
+                                fieldWithPath("data[].memo").description("수입에 대한 간단한 메모"),
+                                fieldWithPath("data[].date").description("수입 날짜"),
+                                fieldWithPath("data[].incomeTag").description("수입 태그").optional().type(JsonFieldType.NULL),
+                                fieldWithPath("pageInfo").description("페이지 정보"),
+                                fieldWithPath("pageInfo.pageNumber").description("현재 페이지 번호"),
+                                fieldWithPath("pageInfo.pageSize").description("페이지 크기"),
+                                fieldWithPath("pageInfo.totalElements").description("총 요소 수"),
+                                fieldWithPath("pageInfo.totalPages").description("전체 페이지 수")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("수입 날짜 범위 조회 성공 3 : 일 단위")
+    @Order(20)
+    void getIncomesByDateRangeTest_Success3() throws Exception {
+        // when
+        mockMvc.perform(
+                        get("/income/range")
+                                .header("Authorization", token)
+                                .param("page", "1")
+                                .param("size", "5")
+                                .param("startDate", "2024-01-01")
+                                .param("endDate", "2024-01-30")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isOk())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getIncomesByDateRangeTest_Success3",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("startDate").description("시작 조회 날짜"),
+                                parameterWithName("endDate").description("종료 조회 날짜")
+                        ),
+                        responseFields(
+                                fieldWithPath("data").description("데이터 목록"),
+                                fieldWithPath("data[].incomeId").description("수입 식별자"),
+                                fieldWithPath("data[].money").description("수입 금액"),
+                                fieldWithPath("data[].incomeName").description("수입명"),
+                                fieldWithPath("data[].memo").description("수입에 대한 간단한 메모"),
+                                fieldWithPath("data[].date").description("수입 날짜"),
+                                fieldWithPath("data[].incomeTag").description("수입 태그").optional().type(JsonFieldType.NULL),
+                                fieldWithPath("pageInfo").description("페이지 정보"),
+                                fieldWithPath("pageInfo.pageNumber").description("현재 페이지 번호"),
+                                fieldWithPath("pageInfo.pageSize").description("페이지 크기"),
+                                fieldWithPath("pageInfo.totalElements").description("총 요소 수"),
+                                fieldWithPath("pageInfo.totalPages").description("전체 페이지 수")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("수입 날짜 범위 조회 실패 1 : 시작 월자가 유효하지 않은 경우")
+    @Order(21)
+    void getIncomesByDateRangeTest_Fail1() throws Exception {
+        // given
+        incomeRepository.deleteAll();
+
+        // when
+        mockMvc.perform(
+                        get("/income/range")
+                                .header("Authorization", token)
+                                .param("page", "1")
+                                .param("size", "5")
+                                .param("startDate", "2024-00-01")
+                                .param("endDate", "2024-01-05")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getIncomesByDateRangeTest_Fail1",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("startDate").description("시작 조회 날짜"),
+                                parameterWithName("endDate").description("종료 조회 날짜")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").description("상태 코드"),
+                                fieldWithPath("message").description("상태 메시지"),
+                                fieldWithPath("fieldErrors").description("입력 필드 에러 목록"),
+                                fieldWithPath("violationErrors").description("규칙 위반 목록")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("수입 날짜 범위 조회 실패 2 : 종료 월자가 유효하지 않은 경우")
+    @Order(22)
+    void getIncomesByDateRangeTest_Fail2() throws Exception {
+        // given
+        incomeRepository.deleteAll();
+
+        // when
+        mockMvc.perform(
+                        get("/income/range")
+                                .header("Authorization", token)
+                                .param("page", "1")
+                                .param("size", "5")
+                                .param("startDate", "2024-01-01")
+                                .param("endDate", "2024-13-05")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getIncomesByDateRangeTest_Fail2",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("startDate").description("시작 조회 날짜"),
+                                parameterWithName("endDate").description("종료 조회 날짜")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").description("상태 코드"),
+                                fieldWithPath("message").description("상태 메시지"),
+                                fieldWithPath("fieldErrors").description("입력 필드 에러 목록"),
+                                fieldWithPath("violationErrors").description("규칙 위반 목록")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("수입 날짜 범위 조회 실패 3 : 시작 일자가 유효하지 않은 경우")
+    @Order(23)
+    void getIncomesByDateRangeTest_Fail3() throws Exception {
+        // given
+        incomeRepository.deleteAll();
+
+        // when
+        mockMvc.perform(
+                        get("/income/range")
+                                .header("Authorization", token)
+                                .param("page", "1")
+                                .param("size", "5")
+                                .param("startDate", "2024-01-00")
+                                .param("endDate", "2024-02-05")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getIncomesByDateRangeTest_Fail3",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("startDate").description("시작 조회 날짜"),
+                                parameterWithName("endDate").description("종료 조회 날짜")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").description("상태 코드"),
+                                fieldWithPath("message").description("상태 메시지"),
+                                fieldWithPath("fieldErrors").description("입력 필드 에러 목록"),
+                                fieldWithPath("violationErrors").description("규칙 위반 목록")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("수입 날짜 범위 조회 실패 4 : 종료 일자가 유효하지 않은 경우")
+    @Order(24)
+    void getIncomesByDateRangeTest_Fail4() throws Exception {
+        // given
+        incomeRepository.deleteAll();
+
+        // when
+        mockMvc.perform(
+                        get("/income/range")
+                                .header("Authorization", token)
+                                .param("page", "1")
+                                .param("size", "5")
+                                .param("startDate", "2024-01-01")
+                                .param("endDate", "2024-02-00")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getIncomesByDateRangeTest_Fail4",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("startDate").description("시작 조회 날짜"),
+                                parameterWithName("endDate").description("종료 조회 날짜")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").description("상태 코드"),
+                                fieldWithPath("message").description("상태 메시지"),
+                                fieldWithPath("fieldErrors").description("입력 필드 에러 목록"),
+                                fieldWithPath("violationErrors").description("규칙 위반 목록")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("수입 날짜 범위 조회 실패 5 : 시작 날짜가 종료 날짜보다 큰 경우 (범위가 유효하지 않음)")
+    @Order(25)
+    void getIncomesByDateRangeTest_Fail5() throws Exception {
+        // given
+        incomeRepository.deleteAll();
+
+        // when
+        mockMvc.perform(
+                        get("/income/range")
+                                .header("Authorization", token)
+                                .param("page", "1")
+                                .param("size", "5")
+                                .param("startDate", "2024-02-01")
+                                .param("endDate", "2024-01-01")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getIncomesByDateRangeTest_Fail5",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("startDate").description("시작 조회 날짜"),
+                                parameterWithName("endDate").description("종료 조회 날짜")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").description("상태 코드"),
+                                fieldWithPath("message").description("상태 메시지"),
+                                fieldWithPath("fieldErrors").description("입력 필드 에러 목록"),
+                                fieldWithPath("violationErrors").description("규칙 위반 목록")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("수입 날짜 범위 조회 실패 6 : 시작 날짜 형식이 유효하지 않은 경우")
+    @Order(26)
+    void getIncomesByDateRangeTest_Fail6() throws Exception {
+        // given
+        incomeRepository.deleteAll();
+
+        // when
+        mockMvc.perform(
+                        get("/income/range")
+                                .header("Authorization", token)
+                                .param("page", "1")
+                                .param("size", "5")
+                                .param("startDate", "-2024-01-01")
+                                .param("endDate", "2024-01-02")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getIncomesByDateRangeTest_Fail6",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("startDate").description("시작 조회 날짜"),
+                                parameterWithName("endDate").description("종료 조회 날짜")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").description("상태 코드"),
+                                fieldWithPath("message").description("상태 메시지"),
+                                fieldWithPath("fieldErrors").description("입력 필드 에러 목록"),
+                                fieldWithPath("violationErrors").description("규칙 위반 목록")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("수입 날짜 범위 조회 실패 7 : 종료 날짜 형식이 유효하지 않은 경우")
+    @Order(27)
+    void getIncomesByDateRangeTest_Fail7() throws Exception {
+        // given
+        incomeRepository.deleteAll();
+
+        // when
+        mockMvc.perform(
+                        get("/income/range")
+                                .header("Authorization", token)
+                                .param("page", "1")
+                                .param("size", "5")
+                                .param("startDate", "2024-01-01")
+                                .param("endDate", "-2024-01-02")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getIncomesByDateRangeTest_Fail7",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("startDate").description("시작 조회 날짜"),
+                                parameterWithName("endDate").description("종료 조회 날짜")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").description("상태 코드"),
+                                fieldWithPath("message").description("상태 메시지"),
+                                fieldWithPath("fieldErrors").description("입력 필드 에러 목록"),
+                                fieldWithPath("violationErrors").description("규칙 위반 목록")
+                        )
+                ));
+    }
+
+    @Test
     @DisplayName("수입 삭제 성공 1 : 태그가 null인 경우")
-    @Order(16)
+    @Order(28)
     void deleteIncomeTest_Success1() throws Exception {
         // when
         mockMvc.perform(
@@ -981,7 +1543,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 삭제 성공 2 : 태그와 연결된 다른 수입이 없는 경우")
-    @Order(17)
+    @Order(29)
     void deleteIncomeTest_Success2() throws Exception {
         // given
         LedgerTag tag = new LedgerTag();
@@ -1022,7 +1584,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 삭제 성공 3 : 태그와 연결된 다른 수입이 있는 경우")
-    @Order(18)
+    @Order(30)
     void deleteIncomeTest_Success3() throws Exception {
         // given
         LedgerTag tag = new LedgerTag();
@@ -1076,7 +1638,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("수입 삭제 실패 : 수입이 존재하지 않는 경우")
-    @Order(19)
+    @Order(31)
     void deleteIncomeTest_Fail() throws Exception {
         // given
         incomeRepository.deleteAll();
@@ -1111,7 +1673,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("월별 수입 조회 성공 1 : 수입이 존재하는 경우")
-    @Order(20)
+    @Order(32)
     void getMonthlyIncomeTest_Success1() throws Exception {
         // when
         mockMvc.perform(
@@ -1145,7 +1707,7 @@ public class IncomeIntegrationTest {
 
     @Test
     @DisplayName("월별 수입 조회 성공 2 : 수입이 존재하지 않는 경우")
-    @Order(21)
+    @Order(33)
     void getMonthlyIncomeTest_Success2() throws Exception {
         // given
         incomeRepository.deleteAll();
@@ -1181,14 +1743,14 @@ public class IncomeIntegrationTest {
     }
 
     @Test
-    @DisplayName("월별 수입 조회 실패 : 날짜가 유효하지 않은 경우")
-    @Order(22)
-    void getMonthlyIncomeTest_Fail() throws Exception {
+    @DisplayName("월별 수입 조회 실패 1 : 월자가 유효하지 않은 경우")
+    @Order(34)
+    void getMonthlyIncomeTest_Fail1() throws Exception {
         // when
         mockMvc.perform(
                         get("/income/monthly")
                                 .header("Authorization", token)
-                                .param("date", "2024-123")
+                                .param("date", "2024-13")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .characterEncoding("UTF-8")
                 )
@@ -1198,7 +1760,43 @@ public class IncomeIntegrationTest {
                 .andDo(print())
 
                 // documentation
-                .andDo(document("IncomeIntegrationTest/getMonthlyIncomeTest_Fail",
+                .andDo(document("IncomeIntegrationTest/getMonthlyIncomeTest_Fail1",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("JWT 액세스 토큰")
+                        ),
+                        requestParameters(
+                                parameterWithName("date").description("조회 날짜 (유효하지 않음)")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").description("상태 코드"),
+                                fieldWithPath("message").description("상태 메시지"),
+                                fieldWithPath("fieldErrors").description("입력 필드 에러 목록"),
+                                fieldWithPath("violationErrors").description("규칙 위반 목록")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("월별 수입 조회 실패 2 : 날짜가 유효하지 않은 경우")
+    @Order(35)
+    void getMonthlyIncomeTest_Fail2() throws Exception {
+        // when
+        mockMvc.perform(
+                        get("/income/monthly")
+                                .header("Authorization", token)
+                                .param("date", "-2024-12")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                )
+
+                // then
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+
+                // documentation
+                .andDo(document("IncomeIntegrationTest/getMonthlyIncomeTest_Fail2",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(
