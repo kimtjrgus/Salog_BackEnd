@@ -44,9 +44,12 @@ public enum ExceptionCode {
     BUDGET_EXIST(400, "BUDGET_EXIST 이미 존재하는 예산"),
 
     // 가계부 조회 시 유효한 날짜가 아닐 시
+    UNVALIDATED_YEAR(400, "UNVALIDATED_YEAR 연도는 컴퓨터 시간 기준 앞뒤 100년 까지로 제한 됩니다."),
     UNVALIDATED_DAY(400, "UNVALIDATED_DAY 유효하지 않은 일자"),
-    UNVALIDATED_MONTH(400, "UNVALIDATED_MONTH 유효하지 않은 월저"),
+    UNVALIDATED_MONTH(400, "UNVALIDATED_MONTH 유효하지 않은 월자"),
     // 범위 조회 시, 보다 상세한 에러를 위해 에러 코드 추가
+    UNVALIDATED_START_YEAR(400, "UNVALIDATED_START_YEAR 연도는 컴퓨터 시간 기준 앞뒤 100년 까지로 제한 됩니다."),
+    UNVALIDATED_END_YEAR(400, "UNVALIDATED_END_YEAR 연도는 컴퓨터 시간 기준 앞뒤 100년 까지로 제한 됩니다."),
     UNVALIDATED_START_DAY(400, "UNVALIDATED_START_DAY 유효하지 않은 시작 일자"),
     UNVALIDATED_END_DAY(400, "UNVALIDATED_END_DAY 유효하지 않은 종료 일자"),
     UNVALIDATED_START_MONTH(400, "UNVALIDATED_START_MONTH 유효하지 않은 시작 월자"),

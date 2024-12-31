@@ -104,6 +104,11 @@ public class IncomeService {
         int month = arr[1];
         int day = arr[2];
 
+        // 연 유효성 검사
+        if (!isValidYear(year)) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_YEAR);
+        }
+
         // 월 유효성 검사
         if (month < 1 || month > 12) {
             throw new BusinessLogicException(ExceptionCode.UNVALIDATED_MONTH);
@@ -163,6 +168,15 @@ public class IncomeService {
             전부 분리해서 로직 작성 했습니다.
             + 에러 코드도 이에 맞춰 추가 했습니다.
         */
+        // 연 유효성 검사
+        if (!isValidYear(startYear)) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_START_YEAR);
+        }
+
+        if (!isValidYear(endYear)) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_END_YEAR);
+        }
+
         // 시작 월 유효성 검사
         if (startMonth < 1 || startMonth > 12) {
             throw new BusinessLogicException(ExceptionCode.UNVALIDATED_START_MONTH);
@@ -207,6 +221,11 @@ public class IncomeService {
         int[] arr = Arrays.stream(date.split("-")).mapToInt(Integer::parseInt).toArray();
         int year = arr[0];
         int month = arr[1];
+
+        // 연 유효성 검사
+        if (!isValidYear(year)) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_YEAR);
+        }
 
         if (month > 12 || month < 1) {
             throw new BusinessLogicException(ExceptionCode.UNVALIDATED_MONTH);
@@ -308,6 +327,21 @@ public class IncomeService {
             case 2 -> (isLeapYear(year)) ? 29 : 28;
             default -> 0; // 잘못된 월
         };
+    }
+
+    // 연도 유효성 검사 메서드
+    private boolean isValidYear(int year) {
+        int currentYear = LocalDate.now().getYear(); // 현재 연도
+        int minYear = currentYear - 100; // 최소 연도
+        int maxYear = currentYear + 100; // 최대 연도
+
+        // 음수 연도 제한
+        if (year < 0) {
+            return false;
+        }
+
+        // 연도 범위 검사
+        return year >= minYear && year <= maxYear;
     }
 
     // 윤년 여부 판단 메서드
