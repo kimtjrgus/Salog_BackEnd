@@ -45,7 +45,8 @@ public enum ExceptionCode {
 
     // 가계부 조회 시 유효한 날짜가 아닐 시
     UNVALIDATED_DAY(400, "UNVALIDATED_DAY 유효하지 않은 일자"),
-    UNVALIDATED_MONTH(400, "UNVALIDATED_MONTH 유효하지 않은 월자");
+    UNVALIDATED_MONTH(400, "UNVALIDATED_MONTH 유효하지 않은 월자"),
+    INVALID_DATE_RANGE(400, "INVALID_DATE_RANGE 유효하지 않은 날짜 범위");
 
     private int status;
 
