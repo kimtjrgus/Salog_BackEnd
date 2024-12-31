@@ -158,15 +158,29 @@ public class IncomeService {
         int endMonth = endDateArr[1];
         int endDay = endDateArr[2];
 
-        // 월 유효성 검사
-        if (startMonth < 1 || startMonth > 12 || endMonth < 1 || endMonth > 12) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_MONTH);
+        /*
+            시작, 종료, 연, 월, 일을 보다 명확하게 구분해서 에러 난 부분을 캐치하기 위해
+            전부 분리해서 로직 작성 했습니다.
+            + 에러 코드도 이에 맞춰 추가 했습니다.
+        */
+        // 시작 월 유효성 검사
+        if (startMonth < 1 || startMonth > 12) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_START_MONTH);
         }
 
-        // 일 유효성 검사
-        if (startDay < 1 || startDay > getMaxDaysInMonth(startMonth, startYear) ||
-                endDay < 1 || endDay > getMaxDaysInMonth(endMonth, endYear)) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_DAY);
+        // 종료 월 유효성 검사
+        if (endMonth < 1 || endMonth > 12) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_END_MONTH);
+        }
+
+        // 시작 일 유효성 검사
+        if (startDay < 1 || startDay > getMaxDaysInMonth(startMonth, startYear)) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_START_DAY);
+        }
+
+        // 종료 일 유효성 검사
+        if (endDay < 1 || endDay > getMaxDaysInMonth(endMonth, endYear)) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_END_DAY);
         }
 
         LocalDate start = LocalDate.of(startYear, startMonth, startDay);
