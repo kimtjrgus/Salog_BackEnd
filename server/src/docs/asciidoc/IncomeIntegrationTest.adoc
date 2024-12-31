@@ -43,13 +43,21 @@ include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_
 
 == fail
 
-=== 수입 생성_실패 : 태그가 유효성 검증에 실패하는 경우
+=== 수입 생성_실패 1 : 태그가 유효성 검증에 실패하는 경우
 
-include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail/http-request.adoc[]
-include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail/request-headers.adoc[]
-include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail/request-fields.adoc[]
-include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail/http-response.adoc[]
-include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail/response-fields.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail1/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail1/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail1/request-fields.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail1/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail1/response-fields.adoc[]
+
+=== 수입 생성_실패 2 : 연도가 유효하지 않은 경우 (100년 제한)
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail2/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail2/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail2/request-fields.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail2/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/postIncomeTest_Fail2/response-fields.adoc[]
 
 
 
@@ -157,6 +165,103 @@ include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getAllIncomesTe
 include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getAllIncomesTest_Fail2/http-response.adoc[]
 include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getAllIncomesTest_Fail2/response-fields.adoc[]
 
+=== 수입 조회_실패 3 : 날짜 형식이 유효하지 않은 경우
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getAllIncomesTest_Fail3/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getAllIncomesTest_Fail3/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getAllIncomesTest_Fail3/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getAllIncomesTest_Fail3/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getAllIncomesTest_Fail3/response-fields.adoc[]
+
+
+
+= 수입 날짜 범위 조회
+
+== pass
+
+=== 수입 날짜 범위 조회_성공 1 : 연 단위
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success1/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success1/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success1/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success1/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success1/response-fields.adoc[]
+
+=== 수입 날짜 범위 조회_성공 2 : 월 단위
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success2/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success2/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success2/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success2/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success2/response-fields.adoc[]
+
+=== 수입 날짜 범위 조회_성공 3 : 일 단위
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success3/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success3/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success3/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success3/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Success3/response-fields.adoc[]
+
+
+== fail
+
+=== 수입 날짜 범위 조회_실패 1 : 시작 월자가 유효하지 않은 경우
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail1/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail1/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail1/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail1/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail1/response-fields.adoc[]
+
+=== 수입 날짜 범위 조회_실패 2 : 종료 월자가 유효하지 않은 경우
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail2/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail2/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail2/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail2/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail2/response-fields.adoc[]
+
+=== 수입 날짜 범위 조회_실패 3 : 시작 일자가 유효하지 않은 경우
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail3/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail3/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail3/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail3/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail3/response-fields.adoc[]
+
+=== 수입 날짜 범위 조회_실패 4 : 종료 일자가 유효하지 않은 경우
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail4/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail4/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail4/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail4/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail4/response-fields.adoc[]
+
+=== 수입 날짜 범위 조회_실패 5 : 시작 날짜가 종료 날짜보다 큰 경우 (범위가 유효하지 않음)
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail5/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail5/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail5/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail5/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail5/response-fields.adoc[]
+
+=== 수입 날짜 범위 조회 실패 6 : 시작 날짜 형식이 유효하지 않은 경우
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail6/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail6/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail6/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail6/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail6/response-fields.adoc[]
+
+=== 수입 날짜 범위 조회 실패 7 : 종료 날짜 형식이 유효하지 않은 경우
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail7/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail7/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail7/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail7/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getIncomesByDateRangeTest_Fail7/response-fields.adoc[]
+
 
 
 = 수입 삭제
@@ -216,13 +321,21 @@ include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncom
 
 == fail
 
-=== 월별 수입 조회_실패 : 날짜가 유효하지 않은 경우
+=== 월별 수입 조회_실패 1 : 월자가 유효하지 않은 경우
 
-include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail/http-request.adoc[]
-include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail/request-headers.adoc[]
-include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail/request-parameters.adoc[]
-include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail/http-response.adoc[]
-include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail/response-fields.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail1/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail1/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail1/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail1/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail1/response-fields.adoc[]
+
+=== 월별 수입 조회 실패 2 : 날짜 형식이 유효하지 않은 경우
+
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail2/http-request.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail2/request-headers.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail2/request-parameters.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail2/http-response.adoc[]
+include::{docdir}/build/generated-snippets/IncomeIntegrationTest/getMonthlyIncomeTest_Fail2/response-fields.adoc[]
 
 == Version 0.0.1-SNAPSHOT
 Last updated 2024-06-14 14:32:58 +0900
