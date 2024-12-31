@@ -53,6 +53,10 @@ public class IncomeService {
         Member member = memberService.findVerifiedMember(jwtTokenizer.getMemberId(token));
         income.setMember(member);
 
+        if (!isValidYear_forCU(income.getDate().getYear())) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_YEAR);
+        }
+
         // 태그
         Income savedIncome = tagHandler(incomePostDto.getIncomeTag(), token, income);
 
@@ -66,6 +70,9 @@ public class IncomeService {
         Income findIncome = findVerifiedIncome(incomeId);
         memberService.verifiedRequest(token, findIncome.getMember().getMemberId());
 
+        if (!isValidYear_forCU(income.getDate().getYear())) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_YEAR);
+        }
 
         Optional.of(income.getMoney())
                 .ifPresent(findIncome::setMoney);
@@ -105,7 +112,7 @@ public class IncomeService {
         int day = arr[2];
 
         // 연 유효성 검사
-        if (!isValidYear(year)) {
+        if (!isValidYear_forR(year)) {
             throw new BusinessLogicException(ExceptionCode.UNVALIDATED_YEAR);
         }
 
@@ -169,11 +176,11 @@ public class IncomeService {
             + 에러 코드도 이에 맞춰 추가 했습니다.
         */
         // 연 유효성 검사
-        if (!isValidYear(startYear)) {
+        if (!isValidYear_forR(startYear)) {
             throw new BusinessLogicException(ExceptionCode.UNVALIDATED_START_YEAR);
         }
 
-        if (!isValidYear(endYear)) {
+        if (!isValidYear_forR(endYear)) {
             throw new BusinessLogicException(ExceptionCode.UNVALIDATED_END_YEAR);
         }
 
@@ -223,7 +230,7 @@ public class IncomeService {
         int month = arr[1];
 
         // 연 유효성 검사
-        if (!isValidYear(year)) {
+        if (!isValidYear_forR(year)) {
             throw new BusinessLogicException(ExceptionCode.UNVALIDATED_YEAR);
         }
 
@@ -329,19 +336,24 @@ public class IncomeService {
         };
     }
 
-    // 연도 유효성 검사 메서드
-    private boolean isValidYear(int year) {
+    // 연도 유효성 검사 메서드 -> 앞뒤로 100년 제한, post, update 시에만 사용
+    private boolean isValidYear_forCU(int year) {
         int currentYear = LocalDate.now().getYear(); // 현재 연도
         int minYear = currentYear - 100; // 최소 연도
         int maxYear = currentYear + 100; // 최대 연도
 
+        // 연도 범위 검사
+        return year >= minYear && year <= maxYear;
+    }
+
+    // 연도 유효성 검사 메서드 2 -> 조회 시에 사용되기 때문에 보다 넓은 range를 위해 음수만 제한
+    private boolean isValidYear_forR(int year) {
         // 음수 연도 제한
         if (year < 0) {
             return false;
         }
 
-        // 연도 범위 검사
-        return year >= minYear && year <= maxYear;
+        return true;
     }
 
     // 윤년 여부 판단 메서드
