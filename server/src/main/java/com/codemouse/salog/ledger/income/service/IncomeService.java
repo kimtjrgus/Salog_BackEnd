@@ -1,7 +1,6 @@
 package com.codemouse.salog.ledger.income.service;
 
 import com.codemouse.salog.auth.jwt.JwtTokenizer;
-import com.codemouse.salog.diary.service.DiaryService;
 import com.codemouse.salog.dto.MultiResponseDto;
 import com.codemouse.salog.exception.BusinessLogicException;
 import com.codemouse.salog.exception.ExceptionCode;
@@ -16,9 +15,6 @@ import com.codemouse.salog.tags.ledgerTags.entity.LedgerTag;
 import com.codemouse.salog.tags.ledgerTags.service.LedgerTagService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -31,6 +27,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -53,8 +50,8 @@ public class IncomeService {
         Member member = memberService.findVerifiedMember(jwtTokenizer.getMemberId(token));
         income.setMember(member);
 
-        if (!isValidYear_forC(income.getDate().getYear())) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_YEAR);
+        if (isValidYear(income.getDate().getYear())) {
+            throw new BusinessLogicException(ExceptionCode.INVALID_YEAR);
         }
 
         // 태그
@@ -102,24 +99,21 @@ public class IncomeService {
 
         Page<Income> incomes;
 
+        isValidDateFormat(date);
+
         int[] arr = Arrays.stream(date.split("-")).mapToInt(Integer::parseInt).toArray();
         int year = arr[0];
         int month = arr[1];
         int day = arr[2];
 
-        // 연 유효성 검사
-        if (!isValidYear_forR(year)) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_YEAR);
-        }
-
         // 월 유효성 검사
         if (month < 1 || month > 12) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_MONTH);
+            throw new BusinessLogicException(ExceptionCode.INVALID_MONTH);
         }
 
         // 일 유효성 검사
         if (day < 0 || day > getMaxDaysInMonth(month, year)) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_DAY);
+            throw new BusinessLogicException(ExceptionCode.INVALID_DAY);
         }
 
         if (incomeTag != null) {
@@ -154,6 +148,9 @@ public class IncomeService {
     public MultiResponseDto<IncomeDto.Response> getIncomesByDateRange(String token, int page, int size, String startDate, String endDate) {
         long memberId = jwtTokenizer.getMemberId(token);
 
+        isValidDateFormat(startDate);
+        isValidDateFormat(endDate);
+
         // start dates
         int[] startDateArr = Arrays.stream(startDate.split("-")).mapToInt(Integer::parseInt).toArray();
         int startYear = startDateArr[0];
@@ -171,33 +168,24 @@ public class IncomeService {
             전부 분리해서 로직 작성 했습니다.
             + 에러 코드도 이에 맞춰 추가 했습니다.
         */
-        // 연 유효성 검사
-        if (!isValidYear_forR(startYear)) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_START_YEAR);
-        }
-
-        if (!isValidYear_forR(endYear)) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_END_YEAR);
-        }
-
         // 시작 월 유효성 검사
         if (startMonth < 1 || startMonth > 12) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_START_MONTH);
+            throw new BusinessLogicException(ExceptionCode.INVALID_START_MONTH);
         }
 
         // 종료 월 유효성 검사
         if (endMonth < 1 || endMonth > 12) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_END_MONTH);
+            throw new BusinessLogicException(ExceptionCode.INVALID_END_MONTH);
         }
 
         // 시작 일 유효성 검사
         if (startDay < 1 || startDay > getMaxDaysInMonth(startMonth, startYear)) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_START_DAY);
+            throw new BusinessLogicException(ExceptionCode.INVALID_START_DAY);
         }
 
         // 종료 일 유효성 검사
         if (endDay < 1 || endDay > getMaxDaysInMonth(endMonth, endYear)) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_END_DAY);
+            throw new BusinessLogicException(ExceptionCode.INVALID_END_DAY);
         }
 
         LocalDate start = LocalDate.of(startYear, startMonth, startDay);
@@ -221,17 +209,19 @@ public class IncomeService {
     public IncomeDto.MonthlyResponse getMonthlyIncome(String token, String date) {
         long memberId = jwtTokenizer.getMemberId(token);
 
+        isValidDateFormat(date);
+
         int[] arr = Arrays.stream(date.split("-")).mapToInt(Integer::parseInt).toArray();
         int year = arr[0];
         int month = arr[1];
 
         // 연 유효성 검사
-        if (!isValidYear_forR(year)) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_YEAR);
+        if (isValidYear(year)) {
+            throw new BusinessLogicException(ExceptionCode.INVALID_YEAR);
         }
 
         if (month > 12 || month < 1) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_MONTH);
+            throw new BusinessLogicException(ExceptionCode.INVALID_MONTH);
         }
 
         // 월별 태그 합계 계산
@@ -332,28 +322,31 @@ public class IncomeService {
         };
     }
 
-    // 연도 유효성 검사 메서드 -> 앞뒤로 100년 제한, post, update 시에만 사용
-    private boolean isValidYear_forC(int year) {
+    // 연도 유효성 검사 메서드 -> 앞뒤로 100년 제한, post 시에만 사용
+    private boolean isValidYear(int year) {
         int currentYear = LocalDate.now().getYear(); // 현재 연도
         int minYear = currentYear - 100; // 최소 연도
         int maxYear = currentYear + 100; // 최대 연도
 
         // 연도 범위 검사
-        return year >= minYear && year <= maxYear;
-    }
-
-    // 연도 유효성 검사 메서드 2 -> 조회 시에 사용되기 때문에 보다 넓은 range를 위해 음수만 제한
-    private boolean isValidYear_forR(int year) {
-        // 음수 연도 제한
-        if (year < 0) {
-            return false;
-        }
-
-        return true;
+        return year < minYear || year > maxYear;
     }
 
     // 윤년 여부 판단 메서드
     private boolean isLeapYear(int year) {
         return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+    }
+
+    // 날짜를 String으로 받아오기 때문에 형식이 올바른 지 검증하는 메서드
+    // 이로 인해 연도가 음수일 수 없음
+    private static void isValidDateFormat(String date) {
+        // 날짜 형식 검증을 위한 정규 표현식
+        String datePattern = "^\\d{4}-\\d{2}-\\d{2}$";
+        Pattern pattern = Pattern.compile(datePattern);
+
+        // 검증
+        if (!pattern.matcher(date).matches()) {
+            throw new BusinessLogicException(ExceptionCode.INVALID_DATE_FORMAT);
+        }
     }
 }
