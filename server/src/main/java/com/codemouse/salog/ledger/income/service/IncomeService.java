@@ -53,7 +53,7 @@ public class IncomeService {
         Member member = memberService.findVerifiedMember(jwtTokenizer.getMemberId(token));
         income.setMember(member);
 
-        if (!isValidYear_forCU(income.getDate().getYear())) {
+        if (!isValidYear_forC(income.getDate().getYear())) {
             throw new BusinessLogicException(ExceptionCode.UNVALIDATED_YEAR);
         }
 
@@ -69,10 +69,6 @@ public class IncomeService {
         Income income = incomeMapper.incomePatchDtoToIncome(incomePatchDto);
         Income findIncome = findVerifiedIncome(incomeId);
         memberService.verifiedRequest(token, findIncome.getMember().getMemberId());
-
-        if (!isValidYear_forCU(income.getDate().getYear())) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_YEAR);
-        }
 
         Optional.of(income.getMoney())
                 .ifPresent(findIncome::setMoney);
@@ -337,7 +333,7 @@ public class IncomeService {
     }
 
     // 연도 유효성 검사 메서드 -> 앞뒤로 100년 제한, post, update 시에만 사용
-    private boolean isValidYear_forCU(int year) {
+    private boolean isValidYear_forC(int year) {
         int currentYear = LocalDate.now().getYear(); // 현재 연도
         int minYear = currentYear - 100; // 최소 연도
         int maxYear = currentYear + 100; // 최대 연도
