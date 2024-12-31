@@ -351,8 +351,42 @@ public class IncomeServiceTest {
     }
 
     @Test
-    @DisplayName("getMonthlyIncome")
+    @DisplayName("getIncomesByDateRange : 날짜 범위 지정 후 조회")
     @Order(10)
+    void getIncomesByDateRangeTest() {
+        // given
+        String token = "testToken";
+        int page = 1;
+        int size = 10;
+        String startDate = "2024-01-01";
+        String endDate = "2024-01-05";
+
+        List<Income> incomeList = Arrays.asList(income);
+        Page<Income> pages = new PageImpl<>(incomeList);
+
+        when(jwtTokenizer.getMemberId("testToken")).thenReturn(1L);
+        when(incomeRepository.findByDateRange(eq(1L),
+                eq(LocalDate.of(2024, 1, 1)),
+                eq(LocalDate.of(2024, 1, 5)),
+                any(PageRequest.class)))
+                .thenReturn(pages);
+
+        // when
+        MultiResponseDto<IncomeDto.Response> result = incomeService.getIncomesByDateRange(token, page, size, startDate, endDate);
+
+        // then
+        assertNotNull(result);
+        assertFalse(result.getData().isEmpty());
+
+        verify(incomeRepository, times(1)).findByDateRange(eq(1L),
+                eq(LocalDate.of(2024, 1, 1)),
+                eq(LocalDate.of(2024, 1, 5)),
+                any(PageRequest.class));
+    }
+
+    @Test
+    @DisplayName("getMonthlyIncome")
+    @Order(11)
     void getMonthlyIncomeTest() {
         // Given
         String token = "testToken";
@@ -378,7 +412,7 @@ public class IncomeServiceTest {
 
     @Test
     @DisplayName("deleteIncome 1 : 태그가 없는 경우")
-    @Order(11)
+    @Order(12)
     void deleteIncomeTest1() {
         // given
         String token = "testToken";
@@ -397,7 +431,7 @@ public class IncomeServiceTest {
 
     @Test
     @DisplayName("deleteIncome 2 : 태그가 있는 경우")
-    @Order(12)
+    @Order(13)
     void deleteIncomeTest2() {
         // given
         String token = "testToken";
@@ -424,7 +458,7 @@ public class IncomeServiceTest {
 
     @Test
     @DisplayName("deleteIncome 2 : 태그가 여러 개 있는 경우")
-    @Order(13)
+    @Order(14)
     void deleteIncomeTest3() {
         // given
         String token = "testToken";
@@ -459,7 +493,7 @@ public class IncomeServiceTest {
 
     @Test
     @DisplayName("findVerifiedIncome : 수입이 있는 경우")
-    @Order(14)
+    @Order(15)
     void findVerifiedIncomeTest1() {
         // given
         income.setIncomeId(1L);
@@ -477,7 +511,7 @@ public class IncomeServiceTest {
 
     @Test
     @DisplayName("findVerifiedIncome : 수입이 없는 경우")
-    @Order(15)
+    @Order(16)
     void findVerifiedIncomeTest2() {
         // given
         when(incomeRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -491,7 +525,7 @@ public class IncomeServiceTest {
 
     @Test
     @DisplayName("getDailyTotalIncome 1 : 쿼리 결과, 데이터가 있는 경우")
-    @Order(16)
+    @Order(17)
     void getDailyTotalIncomeTest1() {
         // given
         String token = "testToken";
@@ -510,7 +544,7 @@ public class IncomeServiceTest {
 
     @Test
     @DisplayName("getDailyTotalIncome 1 : 쿼리 결과, 데이터가 없는 경우 (0 반환)")
-    @Order(17)
+    @Order(18)
     void getDailyTotalIncomeTest2() {
         // given
         String token = "testToken";
