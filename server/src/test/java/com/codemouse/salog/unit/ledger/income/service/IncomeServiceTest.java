@@ -63,6 +63,7 @@ public class IncomeServiceTest {
         member = new Member();
         income = new Income();
         income.setMember(member);
+        income.setDate(LocalDate.of(2024,1,1)); // 날짜 검증 로직 추가로 해당 부분 삽입
         ledgerTag = new LedgerTag();
     }
 
