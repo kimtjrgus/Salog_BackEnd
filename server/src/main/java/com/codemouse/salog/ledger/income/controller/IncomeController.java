@@ -67,6 +67,22 @@ public class IncomeController {
         return new ResponseEntity<>(pages, HttpStatus.OK);
     }
 
+    @GetMapping("/range")
+    public ResponseEntity<?> getIncomesByDateRange (@RequestHeader(name = "Authorization") String token,
+                                                    @Positive @RequestParam int page,
+                                                    @Positive @RequestParam int size,
+                                                    @RequestParam String startDate,
+                                                    @RequestParam String endDate) {
+
+        tokenBlackListService.isBlackListed(token);
+
+        MultiResponseDto<IncomeDto.Response> pages =
+                incomeService.getIncomesByDateRange(token, page, size, startDate, endDate);
+
+        return new ResponseEntity<>(pages, HttpStatus.OK);
+
+    }
+
     @DeleteMapping("/delete/{income-id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteIncome(@RequestHeader(name = "Authorization") String token,

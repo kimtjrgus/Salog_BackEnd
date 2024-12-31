@@ -110,7 +110,7 @@ public class IncomeService {
         }
 
         // 일 유효성 검사
-        if (day < 1 || day > getMaxDaysInMonth(month, year)) {
+        if (day < 0 || day > getMaxDaysInMonth(month, year)) {
             throw new BusinessLogicException(ExceptionCode.UNVALIDATED_DAY);
         }
 
@@ -135,6 +135,50 @@ public class IncomeService {
             }
         }
 
+
+        List<IncomeDto.Response> incomeList = incomes.getContent().stream()
+                .map(incomeMapper::incomeToIncomeResponseDto)
+                .collect(Collectors.toList());
+
+        return new MultiResponseDto<>(incomeList, incomes);
+    }
+
+    public MultiResponseDto<IncomeDto.Response> getIncomesByDateRange(String token, int page, int size, String startDate, String endDate) {
+        long memberId = jwtTokenizer.getMemberId(token);
+
+        // start dates
+        int[] startDateArr = Arrays.stream(startDate.split("-")).mapToInt(Integer::parseInt).toArray();
+        int startYear = startDateArr[0];
+        int startMonth = startDateArr[1];
+        int startDay = startDateArr[2];
+
+        // end dates
+        int[] endDateArr = Arrays.stream(endDate.split("-")).mapToInt(Integer::parseInt).toArray();
+        int endYear = endDateArr[0];
+        int endMonth = endDateArr[1];
+        int endDay = endDateArr[2];
+
+        // 월 유효성 검사
+        if (startMonth < 1 || startMonth > 12 || endMonth < 1 || endMonth > 12) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_MONTH);
+        }
+
+        // 일 유효성 검사
+        if (startDay < 1 || startDay > getMaxDaysInMonth(startMonth, startYear) ||
+                endDay < 1 || endDay > getMaxDaysInMonth(endMonth, endYear)) {
+            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_DAY);
+        }
+
+        LocalDate start = LocalDate.of(startYear, startMonth, startDay);
+        LocalDate end = LocalDate.of(endYear, endMonth, endDay);
+
+        // 시작 날짜가 종료 날짜 보다 작은 경우 검사
+        if (start.isAfter(end)) {
+            throw new BusinessLogicException(ExceptionCode.INVALID_DATE_RANGE);
+        }
+
+        Page<Income> incomes = incomeRepository.findByDateRange(memberId, start, end,
+                PageRequest.of(page - 1, size, Sort.by("date")));
 
         List<IncomeDto.Response> incomeList = incomes.getContent().stream()
                 .map(incomeMapper::incomeToIncomeResponseDto)

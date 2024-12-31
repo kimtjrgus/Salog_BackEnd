@@ -35,4 +35,8 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
     Long findTotalIncomeByDay(long memberId, LocalDate curDate);
 
     long countByLedgerTag(LedgerTag ledgerTag);
+
+    // 특정 날짜 ~ 날짜 조회
+    @Query("SELECT i FROM Income i WHERE i.member.memberId = :memberId AND i.date BETWEEN :startDate AND :endDate")
+    Page<Income> findByDateRange(@Param("memberId") long memberId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, Pageable pageable);
 }
