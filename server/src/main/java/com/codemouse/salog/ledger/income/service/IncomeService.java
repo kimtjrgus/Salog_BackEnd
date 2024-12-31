@@ -104,9 +104,13 @@ public class IncomeService {
         int month = arr[1];
         int day = arr[2];
 
+        // 월 유효성 검사
         if (month < 1 || month > 12) {
             throw new BusinessLogicException(ExceptionCode.UNVALIDATED_MONTH);
-        } else if (day < 0 || day > 31 ) {
+        }
+
+        // 일 유효성 검사
+        if (day < 1 || day > getMaxDaysInMonth(month, year)) {
             throw new BusinessLogicException(ExceptionCode.UNVALIDATED_DAY);
         }
 
@@ -236,5 +240,20 @@ public class IncomeService {
         tagService.deleteUnusedIncomeTagsByMemberId(token);
 
         return savedIncome;
+    }
+
+    // 월에 따른 최대 일 수 체크 메서드
+    private int getMaxDaysInMonth(int month, int year) {
+        return switch (month) {
+            case 1, 3, 5, 7, 8, 10, 12 -> 31;
+            case 4, 6, 9, 11 -> 30;
+            case 2 -> (isLeapYear(year)) ? 29 : 28;
+            default -> 0; // 잘못된 월
+        };
+    }
+
+    // 윤년 여부 판단 메서드
+    private boolean isLeapYear(int year) {
+        return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     }
 }
