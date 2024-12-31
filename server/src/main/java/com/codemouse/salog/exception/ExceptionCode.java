@@ -43,18 +43,18 @@ public enum ExceptionCode {
     BUDGET_NOT_FOUND(404, "BUDGET_NOT_FOUND 존재하지 않는 월별 예산"),
     BUDGET_EXIST(400, "BUDGET_EXIST 이미 존재하는 예산"),
 
+    // 가계부 조회 시 유효한 날짜 형식이 아닐 시 (문자열로 입력되기 때문에 직접 제한을 두어야 함 / 음수 포함)
+    INVALID_DATE_FORMAT(400, "INVALID_DATE_FORMAT 유효하지 않은 날짜 형식입니다."),
     // 가계부 조회 시 유효한 날짜가 아닐 시
-    UNVALIDATED_YEAR(400, "UNVALIDATED_YEAR 연도는 컴퓨터 시간 기준 앞뒤 100년 까지로 제한 됩니다."),
-    UNVALIDATED_DAY(400, "UNVALIDATED_DAY 유효하지 않은 일자"),
-    UNVALIDATED_MONTH(400, "UNVALIDATED_MONTH 유효하지 않은 월자"),
+    INVALID_YEAR(400, "INVALIDATED_YEAR 연도는 컴퓨터 시각 기준으로 100년까지로 제한됩니다."),
+    INVALID_DAY(400, "INVALIDATED_DAY 유효하지 않은 일자"),
+    INVALID_MONTH(400, "INVALIDATED_MONTH 유효하지 않은 월자"),
     // 범위 조회 시, 보다 상세한 에러를 위해 에러 코드 추가
-    UNVALIDATED_START_YEAR(400, "UNVALIDATED_START_YEAR 연도는 컴퓨터 시간 기준 앞뒤 100년 까지로 제한 됩니다."),
-    UNVALIDATED_END_YEAR(400, "UNVALIDATED_END_YEAR 연도는 컴퓨터 시간 기준 앞뒤 100년 까지로 제한 됩니다."),
-    UNVALIDATED_START_DAY(400, "UNVALIDATED_START_DAY 유효하지 않은 시작 일자"),
-    UNVALIDATED_END_DAY(400, "UNVALIDATED_END_DAY 유효하지 않은 종료 일자"),
-    UNVALIDATED_START_MONTH(400, "UNVALIDATED_START_MONTH 유효하지 않은 시작 월자"),
-    UNVALIDATED_END_MONTH(400, "UNVALIDATED_END_MONTH 유효하지 않은 종료 월자"),
-    INVALID_DATE_RANGE(400, "INVALID_DATE_RANGE 유효하지 않은 날짜 범위");
+    INVALID_START_DAY(400, "INVALIDATED_START_DAY 유효하지 않은 시작 일자"),
+    INVALID_END_DAY(400, "INVALIDATED_END_DAY 유효하지 않은 종료 일자"),
+    INVALID_START_MONTH(400, "INVALIDATED_START_MONTH 유효하지 않은 시작 월자"),
+    INVALID_END_MONTH(400, "INVALIDATED_END_MONTH 유효하지 않은 종료 월자"),
+    INVALID_DATE_RANGE(400, "INVALIDATED_DATE_RANGE 유효하지 않은 날짜 범위");
 
     private int status;
 
