@@ -209,7 +209,14 @@ public class IncomeService {
     public IncomeDto.MonthlyResponse getMonthlyIncome(String token, String date) {
         long memberId = jwtTokenizer.getMemberId(token);
 
-        isValidDateFormat(date);
+        // 월별 조회는 YYYY-MM 형식이기 때문에 별도로 검증
+        String datePattern = "^\\d{4}-\\d{2}";
+        Pattern pattern = Pattern.compile(datePattern);
+
+        // 날짜 형식 검증
+        if (!pattern.matcher(date).matches()) {
+            throw new BusinessLogicException(ExceptionCode.INVALID_DATE_FORMAT);
+        }
 
         int[] arr = Arrays.stream(date.split("-")).mapToInt(Integer::parseInt).toArray();
         int year = arr[0];
