@@ -72,9 +72,9 @@ public class FixedIncomeService {
         int day = dates[2];
 
         if (month < 1 || month > 12) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_MONTH);
+            throw new BusinessLogicException(ExceptionCode.INVALID_MONTH);
         } else if (day < 0 || day > 31 ) {
-            throw new BusinessLogicException(ExceptionCode.UNVALIDATED_DAY);
+            throw new BusinessLogicException(ExceptionCode.INVALID_DAY);
         }
 
         if (day == 0) {
