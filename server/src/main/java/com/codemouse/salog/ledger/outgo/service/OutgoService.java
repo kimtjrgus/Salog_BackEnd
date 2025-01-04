@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,16 +51,21 @@ public class OutgoService {
 
     // POST
     @Transactional
-    public OutgoDto.Response postOutgo (String token, OutgoDto.Post outgoDTO){
+    public OutgoDto.Response createOutgo (String token, OutgoDto.Post outgoDTO){
         tokenBlackListService.isBlackListed(token);
 
+        if(!isValidYear(outgoDTO.getDate().getYear())){
+            throw new BusinessLogicException(ExceptionCode.INVALID_YEAR);
+        }
+
         Member member = memberService.findVerifiedMember(jwtTokenizer.getMemberId(token));
-        Outgo outgo = outgoMapper.OutgoPostDtoToOutgo(outgoDTO);
+        Outgo outgo = outgoMapper.outgoPostDtoToOutgo(outgoDTO);
         outgo.setMember(member);
+
         // 태그 생성 로직
         Outgo savedOutgo = tagHandler(outgoDTO.getOutgoTag(), token, outgo);
 
-        return outgoMapper.OutgoToOutgoResponseDto(savedOutgo);
+        return outgoMapper.outgoToOutgoResponseDto(savedOutgo);
     }
 
     // PATCH
@@ -67,7 +73,7 @@ public class OutgoService {
     public OutgoDto.Response patchOutgo (String token, long outgoId, OutgoDto.Patch outgoDto){
         tokenBlackListService.isBlackListed(token);
 
-        Outgo outgo = outgoMapper.OutgoPatchDtoToOutgo(outgoDto);
+        Outgo outgo = outgoMapper.outgoPatchDtoToOutgo(outgoDto);
         Outgo findOutgo = findVerifiedOutgo(outgoId);
         memberService.verifiedRequest(token, findOutgo.getMember().getMemberId());
 
@@ -81,7 +87,7 @@ public class OutgoService {
 
         Outgo savedOutgo = tagHandler(outgoDto.getOutgoTag(), token, findOutgo);
 
-        return outgoMapper.OutgoToOutgoResponseDto(savedOutgo);
+        return outgoMapper.outgoToOutgoResponseDto(savedOutgo);
     }
 
     // GET All List
@@ -89,10 +95,22 @@ public class OutgoService {
     public MultiResponseDto<OutgoDto.Response> findAllOutgos (String token, int page, int size, String date, String outgoTag){
         tokenBlackListService.isBlackListed(token);
 
-        Page<Outgo> outgoPage = findOutgoPages(token, page, size, date, outgoTag, null);
+        Page<Outgo> outgoPage = findOutgoPages(token, page, size, date, null, null, outgoTag, null);
 
         List<OutgoDto.Response> outgoDtoList = outgoPage.getContent().stream()
-                .map(outgoMapper::OutgoToOutgoResponseDto)
+                .map(outgoMapper::outgoToOutgoResponseDto)
+                .collect(Collectors.toList());
+
+        return new MultiResponseDto<>(outgoDtoList, outgoPage);
+    }
+
+    // 기간을 사용자가 커스텀하여 지출을 조회하는 메서드
+    public MultiResponseDto<OutgoDto.Response> findOutgosByDateRange(String token, int page, int size, String fromDate, String toDate, String outgoTag){
+        tokenBlackListService.isBlackListed(token);
+        Page<Outgo> outgoPage = findOutgoPages(token, page, size, null, fromDate, toDate, outgoTag, null);
+
+        List<OutgoDto.Response> outgoDtoList = outgoPage.getContent().stream()
+                .map(outgoMapper::outgoToOutgoResponseDto)
                 .collect(Collectors.toList());
 
         return new MultiResponseDto<>(outgoDtoList, outgoPage);
@@ -101,10 +119,22 @@ public class OutgoService {
     // GET WasteList
     public MultiResponseDto<OutgoDto.Response> findAllWasteLists(String token, int page, int size, String date, String outgoTag){
         tokenBlackListService.isBlackListed(token);
-        Page<Outgo> wastePage = findOutgoPages(token, page, size, date, outgoTag, true);
+        Page<Outgo> wastePage = findOutgoPages(token, page, size, date, null, null, outgoTag, true);
 
         List<OutgoDto.Response> wasteDtoList = wastePage.getContent().stream()
-                .map(outgoMapper::OutgoToOutgoResponseDto)
+                .map(outgoMapper::outgoToOutgoResponseDto)
+                .collect(Collectors.toList());
+
+        return new MultiResponseDto<>(wasteDtoList, wastePage);
+    }
+
+    // 기간을 사용자가 커스텀하여 낭비리스트를 조회하는 메서드
+    public MultiResponseDto<OutgoDto.Response> findWasteListsByDateRange(String token, int page, int size, String fromDate, String toDate, String outgoTag){
+        tokenBlackListService.isBlackListed(token);
+        Page<Outgo> wastePage = findOutgoPages(token, page, size, null, fromDate, toDate, outgoTag, true);
+
+        List<OutgoDto.Response> wasteDtoList = wastePage.getContent().stream()
+                .map(outgoMapper::outgoToOutgoResponseDto)
                 .collect(Collectors.toList());
 
         return new MultiResponseDto<>(wasteDtoList, wastePage);
@@ -226,24 +256,42 @@ public class OutgoService {
         return savedOutgo;
     }
 
-    // 페이지 생성 중복 코드 통일
-    private Page<Outgo> findOutgoPages(String token, int page, int size, String date, String outgoTag, Boolean isWasteList) {
+    // 지출, 낭비리스트 조회시 페이지 생성 중복 코드 통일 (월별, 일별, 기간 지정 조회)
+    private Page<Outgo> findOutgoPages(String token, int page, int size, String date, String fromDate, String toDate,String outgoTag, Boolean isWasteList) {
         long memberId = jwtTokenizer.getMemberId(token);
         Page<Outgo> outgoPage = null;
 
+        // 입력 받은 날짜의 유효성 검증
+        isValidDate(date, fromDate, toDate);
+
         // 1. 조회할 날짜 지정
-        LocalDate startDate;
-        LocalDate endDate;
+        // 시작 날짜와 종료날짜 null로 초기화
+        LocalDate startDate = null;
+        LocalDate endDate = null;
 
         // 월별 조회
-        if (date.endsWith("00")) {
+        if (date != null && date.endsWith("00") && fromDate == null && toDate == null) { //2025-01-00
             LocalDate parsedDate = LocalDate.parse(date.substring(0, 7) + "-01");
             startDate = parsedDate.withDayOfMonth(1);
             endDate = parsedDate.withDayOfMonth(parsedDate.lengthOfMonth());
         } // 그외 경우 일별 조회
-        else {
+        else if (date != null && !date.endsWith("00") && fromDate == null && toDate == null) {
             startDate = LocalDate.parse(date);
             endDate = startDate;
+        }
+        // 기간 지정 조회시
+        else if (date == null && fromDate != null && toDate != null) {
+            startDate = LocalDate.parse(fromDate.substring(0, 10));
+            endDate = LocalDate.parse(toDate.substring(0, 10));
+
+            // 시작 날짜가 종료 날짜 보다 작은 경우 검사
+            if (startDate.isAfter(endDate)) {
+                throw new BusinessLogicException(ExceptionCode.INVALID_DATE_RANGE);
+            }
+        }
+        else {
+            log.info("date, fromDate, toDate 모두 null 이거나, YYYY-MM-DD 타입이 아닙니다.");
+            throw new BusinessLogicException(ExceptionCode.INVALID_DATE_FORMAT);
         }
 
         // 2. 지정한 날짜에 대한 쿼리들(태그O, 태그X)
@@ -262,10 +310,10 @@ public class OutgoService {
                 outgoPage = outgoRepository.findAllByOutgoIdInAndDateBetween(
                         outgoIds, startDate, endDate, PageRequest.of(page - 1, size, Sort.by("date").descending()));
 
-            } else if(isWasteList){
+            }
+            else if(isWasteList){
                 outgoPage = outgoRepository.findAllByOutgoIdInAndWasteListAndDateBetween(
                         outgoIds, true, startDate, endDate, PageRequest.of(page - 1, size, Sort.by("date").descending()));
-
             }
         }
         else { // none tag
@@ -277,15 +325,14 @@ public class OutgoService {
                         memberId, true, startDate, endDate, PageRequest.of(page - 1, size, Sort.by("date").descending()));
             }
         }
-
         return outgoPage;
     }
     
-    // 상단의 페이지생성 메서드오버로딩
+    // 상단의 페이지생성 메서드오버로딩, 캘린더 대시보드에 출력될 지출의 리스트 생성
     public List<OutgoDto.Response> findOutgoPagesAsList(String token, int page, int size, String date, String outgoTag, Boolean isWasteList){
-        Page<Outgo> outgoPage = findOutgoPages(token, page, size, date, outgoTag, isWasteList);
+        Page<Outgo> outgoPage = findOutgoPages(token, page, size, date, null, null, outgoTag, isWasteList);
         return outgoPage.getContent().stream()
-                .map(outgoMapper::OutgoToOutgoResponseDto)
+                .map(outgoMapper::outgoToOutgoResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -308,5 +355,95 @@ public class OutgoService {
                 callOcrDto.getStoreInfo(), // outgoName
                 receiptImageUrl
         );
+    }
+
+    // 입력 들어온 날짜의 유효성 검증 메서드
+    // date만 들어온 경우/ start, end가 들어온 경우 모두 사용 nullable 하게
+    private void isValidDate(String date, String startDate, String endDate){
+        // 1. 가계부 조회 시 (월간 조회/ 일일 조회)
+        if(date != null && startDate == null && endDate == null){
+            // 날짜 포맷이 맞는지 재검증(yyyy-mm-dd)
+            isValidDateFormat(date);
+
+            int year = Integer.parseInt(date.substring(0, 4));
+            int month = Integer.parseInt(date.substring(5, 7));
+            int day = Integer.parseInt(date.substring(8, 10));
+
+            // 400 error, 유효하지 않은 월자
+            if(month > 12 || month < 1) {
+                throw new BusinessLogicException(ExceptionCode.INVALID_MONTH);
+            }
+            // 400 error, 유효하지 않은 일자
+            if(day < 0 || day > getMaxDaysInMonth(month, year)) {
+                throw new BusinessLogicException(ExceptionCode.INVALID_DAY);
+            }
+        }
+
+        // 2. 기간 지정 조회 시, 보다 상세한 에러를 위해 에러 코드 추가
+        if(date == null && startDate != null && endDate != null) {
+            // 날짜 포맷이 맞는지 재검증 (yyyy-mm-dd)
+            isValidDateFormat(startDate);
+            isValidDateFormat(endDate);
+
+            int startYear = Integer.parseInt(startDate.substring(0, 4));
+            int startMonth = Integer.parseInt(startDate.substring(5, 7));
+            int startDay = Integer.parseInt(startDate.substring(8, 10));
+            int endYear = Integer.parseInt(endDate.substring(0, 4));
+            int endMonth = Integer.parseInt(endDate.substring(5, 7));
+            int endDay = Integer.parseInt(endDate.substring(8, 10));
+
+            // 400 error, 유효하지 않은 시작 월자
+            if(startMonth > 12 || startMonth < 1) {
+                throw new BusinessLogicException(ExceptionCode.INVALID_START_MONTH);
+            }
+
+            // 400 error, 유효하지 않은 종료 월자
+            if(endMonth > 12 || endMonth < 1) {
+                throw new BusinessLogicException(ExceptionCode.INVALID_END_MONTH);
+            }
+
+            // 400 error, 유효하지 않은 시작 일자
+            if(startDay <= 0 || startDay > getMaxDaysInMonth(startMonth, startYear)) {
+                throw new BusinessLogicException(ExceptionCode.INVALID_START_DAY);
+            }
+
+            // 400 error, 유효하지 않은 종료 일자
+            if(endDay <= 0 || endDay > getMaxDaysInMonth(endMonth, endYear)) {
+                throw new BusinessLogicException(ExceptionCode.INVALID_END_DAY);
+            }
+        }
+    }
+
+    // 연도 유효성 검사 메서드 -> 앞뒤로 100년 제한, post 시에만 사용
+    // 범위 안에 있다면 true 반환, 범위 밖이라면 false
+    private boolean isValidYear(int year) {
+        int currentYear = LocalDate.now().getYear(); // 현재 연도
+        int minYear = currentYear - 100; // 최소 연도
+        int maxYear = currentYear + 100; // 최대 연도
+
+        // 연도 범위 검사
+        return year >= minYear && year <= maxYear;
+    }
+
+    // 월에 따른 최대 일 수 체크 메서드
+    private int getMaxDaysInMonth(int month, int year) {
+        return switch (month) {
+            case 1, 3, 5, 7, 8, 10, 12 -> 31;
+            case 4, 6, 9, 11 -> 30;
+            case 2 -> ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) ? 29 : 28; // 윤년일 경우 파악
+            default -> 0; // 잘못된 월
+        };
+    }
+
+    // 날짜를 String으로 받아오기 때문에 형식이 올바른 지 검증하는 메서드
+    private static void isValidDateFormat(String date) {
+        // 날짜 형식 검증을 위한 정규 표현식
+        String datePattern = "^\\d{4}-\\d{2}-\\d{2}$";
+        Pattern pattern = Pattern.compile(datePattern);
+
+        // 검증
+        if (!pattern.matcher(date).matches()) {
+            throw new BusinessLogicException(ExceptionCode.INVALID_DATE_FORMAT);
+        }
     }
 }
