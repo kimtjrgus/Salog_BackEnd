@@ -90,7 +90,7 @@ public class MemberIntegrationTest {
         member.setPassword(passwordEncoder.encode("1234qwer!@#$"));
         member.setEmailAlarm(false);
         member.setHomeAlarm(false);
-        member.setSocial_type(null);
+        member.setSocialType(null);
         member.setRoles(List.of("USER"));
         member.setLedgerTags(Collections.emptyList());
         memberRepository.save(member);
@@ -456,7 +456,7 @@ public class MemberIntegrationTest {
                 .andExpect(jsonPath("$.data.email").value(member.getEmail()))
                 .andExpect(jsonPath("$.data.emailAlarm").value(member.isEmailAlarm()))
                 .andExpect(jsonPath("$.data.homeAlarm").value(member.isHomeAlarm()))
-                .andExpect(jsonPath("$.data.social_type").value(member.getSocial_type()))
+                .andExpect(jsonPath("$.data.social_type").value(member.getSocialType()))
                 .andExpect(jsonPath("$.data.incomeTags", hasSize(0)))
                 .andExpect(jsonPath("$.data.outgoTags", hasSize(0)))
                 .andDo(print())
