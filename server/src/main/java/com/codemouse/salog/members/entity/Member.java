@@ -41,7 +41,7 @@ public class Member extends Auditable {
     // 재사용 용이하게 Enum
     @Enumerated(value = EnumType.STRING)
     @Column
-    private Social_type social_type = null;
+    private Social_type socialType = null;
 
 //    @Enumerated(value = EnumType.STRING)
 //    @Column(nullable = false)
