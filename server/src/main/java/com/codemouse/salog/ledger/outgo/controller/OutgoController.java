@@ -53,9 +53,22 @@ public class OutgoController {
                                          @Positive @RequestParam int size,
                                          @Valid @RequestParam String date,
                                          @Valid @RequestParam(required = false) String outgoTag){
-
         MultiResponseDto<OutgoDto.Response> outgoPages =
                 service.findAllOutgos(token, page, size, date, outgoTag);
+
+        return new ResponseEntity<>(outgoPages, HttpStatus.OK);
+    }
+
+    @GetMapping("/range")
+    public ResponseEntity<?> getOutgoListsByDateRange (@RequestHeader(name = "Authorization") String token,
+                                                       @Positive @RequestParam int page,
+                                                       @Positive @RequestParam int size,
+                                                       @RequestParam String startDate,
+                                                       @RequestParam String endDate,
+                                                       @Valid @RequestParam(required = false) String outgoTag) {
+        MultiResponseDto<OutgoDto.Response> outgoPages =
+                service.findOutgosByDateRange(token, page, size, startDate, endDate, outgoTag);
+
         return new ResponseEntity<>(outgoPages, HttpStatus.OK);
     }
 
@@ -68,6 +81,20 @@ public class OutgoController {
 
         MultiResponseDto<OutgoDto.Response> wastePages =
                 service.findAllWasteLists(token, page, size, date, outgoTag);
+
+        return new ResponseEntity<>(wastePages, HttpStatus.OK);
+    }
+
+    @GetMapping("/wasteList/range")
+    public ResponseEntity<?> getWasteListsByDateRange (@RequestHeader(name = "Authorization") String token,
+                                                       @Positive @RequestParam int page,
+                                                       @Positive @RequestParam int size,
+                                                       @RequestParam String startDate,
+                                                       @RequestParam String endDate,
+                                                       @Valid @RequestParam(required = false) String outgoTag) {
+        MultiResponseDto<OutgoDto.Response> wastePages =
+                service.findWasteListsByDateRange(token, page, size, startDate, endDate, outgoTag);
+
         return new ResponseEntity<>(wastePages, HttpStatus.OK);
     }
 
