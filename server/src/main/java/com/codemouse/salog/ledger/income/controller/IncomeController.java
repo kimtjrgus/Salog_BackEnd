@@ -50,6 +50,10 @@ public class IncomeController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /*
+        getAllIncomes 의 경우 상세 조회, 전체 조회 두 가지 기능을 수행하기 때문에 date를 String으로 받아옴
+        또한 getAllIncomes 를 포함한 날짜 범위 조회, 월별 조회의 경우 상세한 에러 리턴을 위해 date를 String 타입으로 받아옴
+     */
     @GetMapping
     public ResponseEntity<?> getAllIncomes (@RequestHeader(name = "Authorization") String token,
                                             @Positive @RequestParam int page,
@@ -65,6 +69,22 @@ public class IncomeController {
         httpResponseCounter.recordResponse("200"); // 프로메테우스 응답 상태 코드 매트릭 수집
 
         return new ResponseEntity<>(pages, HttpStatus.OK);
+    }
+
+    @GetMapping("/range")
+    public ResponseEntity<?> getIncomesByDateRange (@RequestHeader(name = "Authorization") String token,
+                                                    @Positive @RequestParam int page,
+                                                    @Positive @RequestParam int size,
+                                                    @RequestParam String startDate,
+                                                    @RequestParam String endDate) {
+
+        tokenBlackListService.isBlackListed(token);
+
+        MultiResponseDto<IncomeDto.Response> pages =
+                incomeService.getIncomesByDateRange(token, page, size, startDate, endDate);
+
+        return new ResponseEntity<>(pages, HttpStatus.OK);
+
     }
 
     @DeleteMapping("/delete/{income-id}")

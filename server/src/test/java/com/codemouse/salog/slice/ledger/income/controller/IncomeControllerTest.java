@@ -127,8 +127,28 @@ public class IncomeControllerTest {
     }
 
     @Test
-    @DisplayName("/delete/{income-id}")
+    @DisplayName("/income : 전체 Read")
     @Order(4)
+    void getIncomesByDateRangeTest() throws Exception {
+        // Given
+
+        // When
+        mockMvc.perform(
+                        get("/income/range")
+                                .header("Authorization", "Bearer fakeToken")
+                                .param("page", "1")
+                                .param("size", "1")
+                                .param("startDate", "2024-01-01")
+                                .param("endDate", "2024-01-05")
+                )
+                // then
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("/delete/{income-id}")
+    @Order(5)
     void deleteIncomeTest() throws Exception {
         // Given
 
@@ -145,7 +165,7 @@ public class IncomeControllerTest {
 
     @Test
     @DisplayName("/monthly")
-    @Order(5)
+    @Order(6)
     void getMonthlyIncomeTest() throws Exception {
         // Given
 
