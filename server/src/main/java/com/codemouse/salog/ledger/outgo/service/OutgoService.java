@@ -328,9 +328,20 @@ public class OutgoService {
         return outgoPage;
     }
     
-    // 상단의 페이지생성 메서드오버로딩, 캘린더 대시보드에 출력될 지출의 리스트 생성
-    public List<OutgoDto.Response> findOutgoPagesAsList(String token, int page, int size, String date, String outgoTag, Boolean isWasteList){
-        Page<Outgo> outgoPage = findOutgoPages(token, page, size, date, null, null, outgoTag, isWasteList);
+    // 상단의 페이지생성 메서드 오버로딩, 캘린더 대시보드에 출력될 지출의 리스트 생성
+    public List<OutgoDto.Response> findOutgoPagesAsList(String token, int page, int size, String date, String fromDate, String toDate, String outgoTag, Boolean isWasteList){
+        Page<Outgo> outgoPage = null; // 페이지 선언 및 초기화
+
+        // 월별 조회시
+        if(date != null && date.endsWith("00") && fromDate == null && toDate == null){
+            outgoPage = findOutgoPages(token, page, size, date, null, null, outgoTag, isWasteList);
+        }
+
+        // 기간 지정 조회시
+        if(date == null && fromDate != null && toDate != null){
+            outgoPage = findOutgoPages(token, page, size, null, fromDate, toDate, outgoTag, isWasteList);
+        }
+
         return outgoPage.getContent().stream()
                 .map(outgoMapper::outgoToOutgoResponseDto)
                 .collect(Collectors.toList());

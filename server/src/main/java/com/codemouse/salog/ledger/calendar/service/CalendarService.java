@@ -24,6 +24,7 @@ public class CalendarService {
     private final IncomeService incomeService;
     private final OutgoService outgoService;
 
+    // 캘린더 대시보드 메인화면의 합계만을 보여주는 메서드
     public List<CalendarDto.Response> getCalendar(String token, String date){
         List<CalendarDto.Response> responses = new ArrayList<>();
 
@@ -44,10 +45,26 @@ public class CalendarService {
         return responses;
     }
 
-    public MultiResponseDto<CalendarDto.LedgerResponse> getIntegratedLedger(String token, int page, int size, String date, String ledgerTag){
-        List<IncomeDto.Response> incomeList = incomeService.getIncomes(token, 1, Integer.MAX_VALUE, ledgerTag, date).getData();
-        List<OutgoDto.Response> outgoList = outgoService.findOutgoPagesAsList(token, 1, Integer.MAX_VALUE, date, ledgerTag, null);
+    // 캘린더 대시보드 클릭시 세부화면에서 출력되는 수입/지출 리스트를 조회하는 메서드
+    // 월별 조회와 더불어 기간 지정 조회 가능하게 변경
+    public MultiResponseDto<CalendarDto.LedgerResponse> getIntegratedLedger(String token, int page, int size, String date,
+                                                                            String fromDate, String toDate, String ledgerTag){
+        List<IncomeDto.Response> incomeList = new ArrayList<>();;
+        List<OutgoDto.Response> outgoList = new ArrayList<>();;
 
+        // 월별 조회
+        if (date != null){
+            incomeList = incomeService.getIncomes(token, 1, Integer.MAX_VALUE, ledgerTag, date).getData();
+            outgoList = outgoService.findOutgoPagesAsList(token, 1, Integer.MAX_VALUE, date, null, null, ledgerTag, null);
+        }
+
+        // 기간 지정 조회
+        if(date == null && fromDate != null && toDate != null){
+            incomeList = incomeService.getIncomesByDateRange(token, 1, Integer.MAX_VALUE, fromDate, toDate).getData();
+            outgoList = outgoService.findOutgoPagesAsList(token, 1, Integer.MAX_VALUE, null, fromDate, toDate, null, null);
+        }
+
+        // 가져온 수입, 지출 리스트를 가계부 전체 리스트화
         List<CalendarDto.LedgerResponse> ledgerResponses = new ArrayList<>();
 
         for (IncomeDto.Response income : incomeList) {
@@ -82,6 +99,7 @@ public class CalendarService {
                     ));
         }
 
+        // 전체 리스트를 날짜순 정렬
         ledgerResponses.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
 
         // 페이지 처리
