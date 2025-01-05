@@ -62,15 +62,16 @@ public class DiaryController {
         return new ResponseEntity<>(pageDiaries, HttpStatus.OK);
     }
 
-    // title list get
+    // 제목, 내용, 제목+내용 검색으로 일기 리스트 조회
     @GetMapping("/search")
-    public ResponseEntity<?> getTitleDiaries (@RequestHeader(name = "Authorization") String token,
-                                          @Positive @RequestParam int page,
-                                          @Positive @RequestParam int size,
-                                          @Valid @RequestParam String title){
+    public ResponseEntity<?> getSearchDiaries (@RequestHeader(name = "Authorization") String token,
+                                               @Positive @RequestParam int page,
+                                               @Positive @RequestParam int size,
+                                               @Valid @RequestParam String searchType,
+                                               @Valid @RequestParam String query){
 
         MultiResponseDto<DiaryDto.Response> pageDiaries =
-                diaryService.findTitleDiaries(token, page, size, title);
+                diaryService.findSearchDiaries(token, page, size, searchType, query);
 
         return new ResponseEntity<>(pageDiaries, HttpStatus.OK);
     }

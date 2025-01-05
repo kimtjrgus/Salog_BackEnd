@@ -16,6 +16,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
     Page<Diary> findAllByMemberMemberIdAndDate(Long memberId, LocalDate date, Pageable pageable);
     Page<Diary> findAllByMemberMemberIdAndTitleContaining(long memberId, String title, Pageable pageRequest);
+    Page<Diary> findAllByMemberMemberIdAndBodyContaining(long memberId, String body, Pageable pageRequest);
+    Page<Diary> findAllByMemberMemberIdAndTitleContainingOrBodyContaining(long memberId, String title, String body,Pageable pageRequest);
 
     @Query("SELECT DISTINCT d.date FROM Diary d WHERE d.member.id = :memberId AND YEAR(d.date) = :year AND MONTH(d.date) = :month")
     List<LocalDate> findDistinctDatesByMemberIdAndYearAndMonth(@Param("memberId") Long memberId, @Param("year") int year, @Param("month") int month);
