@@ -40,7 +40,21 @@ public class CalendarController {
                                                  @Valid @RequestParam String date,
                                                  @Valid @RequestParam(required = false) String ledgerTag){
         tokenBlackListService.isBlackListed(token);
-        MultiResponseDto<CalendarDto.LedgerResponse> responses = calendarService.getIntegratedLedger(token, page, size, date, ledgerTag);
+        MultiResponseDto<CalendarDto.LedgerResponse> responses =
+                calendarService.getIntegratedLedger(token, page, size, date, null, null, ledgerTag);
+
+        return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
+
+    @GetMapping("/ledger/range")
+    public ResponseEntity<?> getIntegratedLedgerByRange(@RequestHeader(name = "Authorization") String token,
+                                                        @Positive @RequestParam int page,
+                                                        @Positive @RequestParam int size,
+                                                        @Valid @RequestParam String startDate,
+                                                        @Valid @RequestParam String endDate){
+        tokenBlackListService.isBlackListed(token);
+        MultiResponseDto<CalendarDto.LedgerResponse> responses =
+                calendarService.getIntegratedLedger(token, page, size, null, startDate, endDate, null);
 
         return new ResponseEntity<>(responses, HttpStatus.OK);
     }
