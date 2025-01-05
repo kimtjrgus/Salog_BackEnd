@@ -1,5 +1,6 @@
 package com.codemouse.salog.ledger.outgo.entity;
 
+import com.codemouse.salog.audit.Auditable;
 import com.codemouse.salog.members.entity.Member;
 import com.codemouse.salog.tags.ledgerTags.entity.LedgerTag;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Outgo {
+public class Outgo extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long outgoId;

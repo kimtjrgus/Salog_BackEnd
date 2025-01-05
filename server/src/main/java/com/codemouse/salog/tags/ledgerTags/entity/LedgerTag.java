@@ -1,5 +1,6 @@
 package com.codemouse.salog.tags.ledgerTags.entity;
 
+import com.codemouse.salog.audit.Auditable;
 import com.codemouse.salog.ledger.income.entity.Income;
 import com.codemouse.salog.ledger.outgo.entity.Outgo;
 import com.codemouse.salog.members.entity.Member;
@@ -15,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class LedgerTag {
+public class LedgerTag extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long ledgerTagId;

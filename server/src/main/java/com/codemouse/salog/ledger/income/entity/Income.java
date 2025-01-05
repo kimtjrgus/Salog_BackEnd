@@ -1,5 +1,6 @@
 package com.codemouse.salog.ledger.income.entity;
 
+import com.codemouse.salog.audit.Auditable;
 import com.codemouse.salog.diary.entity.Diary;
 import com.codemouse.salog.members.entity.Member;
 import com.codemouse.salog.tags.ledgerTags.entity.LedgerTag;
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
-public class Income {
+public class Income extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long incomeId;
