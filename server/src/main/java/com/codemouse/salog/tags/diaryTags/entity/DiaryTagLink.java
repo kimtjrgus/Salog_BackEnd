@@ -1,5 +1,6 @@
 package com.codemouse.salog.tags.diaryTags.entity;
 
+import com.codemouse.salog.audit.Auditable;
 import com.codemouse.salog.diary.entity.Diary;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class DiaryTagLink {
+public class DiaryTagLink extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long DiaryTagLinkId;
