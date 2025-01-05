@@ -239,19 +239,42 @@ public class DiaryService {
             return new MultiResponseDto<>(diaryDtoList, diaryPage);
     }
 
-    //title List get
+    // 일기를 검색하는 메서드(제목, 내용, 제목+내용)
     @Transactional
-    public MultiResponseDto<DiaryDto.Response> findTitleDiaries (String token, int page, int size, String title){
+    public MultiResponseDto<DiaryDto.Response> findSearchDiaries (String token, int page, int size, String searchType, String query){
         tokenBlackListService.isBlackListed(token); // 로그아웃 된 회원인지 체크
         long memberId = jwtTokenizer.getMemberId(token);
 
         // UTF-8로 디코딩
-        String decodedTitle = URLDecoder.decode(title, StandardCharsets.UTF_8);
-        log.info("DecodedTitle To UTF-8 : {}", decodedTitle);
+        String decodedQueryStr = URLDecoder.decode(query, StandardCharsets.UTF_8);
+        log.info("DecodedTitle To UTF-8 : {}", decodedQueryStr);
 
         // page 정보 생성
-        Page<Diary> diaryPage = diaryRepository.findAllByMemberMemberIdAndTitleContaining(memberId, decodedTitle,
-                PageRequest.of(page -1, size, Sort.by("date").descending()));
+        Page<Diary> diaryPage;
+
+        switch (searchType) {
+            case "title":
+                // 제목만 검색
+                diaryPage = diaryRepository.findAllByMemberMemberIdAndTitleContaining(memberId, decodedQueryStr,
+                        PageRequest.of(page - 1, size, Sort.by("date").descending()));
+                break;
+
+            case "body":
+                // 내용만 검색
+                diaryPage = diaryRepository.findAllByMemberMemberIdAndBodyContaining(memberId, decodedQueryStr,
+                        PageRequest.of(page - 1, size, Sort.by("date").descending()));
+                break;
+
+            case "title_body":
+                // 제목 + 내용 검색
+                diaryPage = diaryRepository.findAllByMemberMemberIdAndTitleContainingOrBodyContaining(memberId, decodedQueryStr, decodedQueryStr,
+                        PageRequest.of(page - 1, size, Sort.by("date").descending()));
+                break;
+
+            default:
+                // 잘못된 검색 타입에 대해 예외 처리
+                throw new BusinessLogicException(ExceptionCode.INVALID_SEARCH_TYPE);
+        }
 
         List<DiaryDto.Response> diaryDtoList = diaryPage.getContent().stream()
                 .map(diary -> {
@@ -271,7 +294,7 @@ public class DiaryService {
         return new MultiResponseDto<>(diaryDtoList, diaryPage);
     }
 
-    // Get Diary Calendar
+    // Get 해당 '년'과 '월'에 대한 일기의 날짜만을 가져옴, 날짜를 리스트로 보여줌.
     public List<DiaryDto.ResponseCalender> getDiaryCalendar(String token, String date){
         tokenBlackListService.isBlackListed(token);
         long memberId = jwtTokenizer.getMemberId(token);
