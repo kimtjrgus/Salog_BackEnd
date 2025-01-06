@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -114,6 +115,14 @@ public class OutgoController {
                 service.getSumOfWasteLists(token, date);
 
         return new ResponseEntity<>(sumOfWasteLists, HttpStatus.OK);
+    }
+
+    @GetMapping("/yearly") // GET 연단위 월별 수입, 지출 총합계
+    public ResponseEntity<?> getLedgerSumByMonth (@RequestHeader(name = "Authorization") String token,
+                                                  @Valid @RequestParam String date){
+        List<OutgoDto.YearlyResponse> responseList = service.getLedgerSumByMonth(token, date);
+
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{outgo-id}")
