@@ -80,5 +80,14 @@ public class OutgoDto {
         private long monthlyTotal;
         private List<LedgerTagDto.MonthlyResponse> tags;
     }
+
+    @AllArgsConstructor
+    @Getter
+    public static class YearlyResponse {
+        // 연간 수입/지출 총합계
+        private String date;    // 수입,지출을 보여줄 해당 월
+        private long monthlyIncome; // 월간 수입의 총합계
+        private long monthlyOutgo;  // 월간 지출의 총합계
+    }
 }
 
