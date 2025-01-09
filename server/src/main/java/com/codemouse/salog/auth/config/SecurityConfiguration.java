@@ -8,6 +8,7 @@ import com.codemouse.salog.auth.handler.MemberAuthenticationFailureHandler;
 import com.codemouse.salog.auth.handler.MemberAuthenticationSuccessHandler;
 import com.codemouse.salog.auth.jwt.JwtTokenizer;
 import com.codemouse.salog.auth.utils.CustomAuthorityUtils;
+import com.codemouse.salog.auth.utils.CustomPasswordEncoder;
 import com.codemouse.salog.members.repository.MemberRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +19,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -120,7 +122,7 @@ public class SecurityConfiguration implements WebMvcConfigurer {
     // PasswordEncoder Beans 객체 생성
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        return new CustomPasswordEncoder();
     }
 
     @Bean
