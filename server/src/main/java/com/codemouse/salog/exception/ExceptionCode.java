@@ -10,7 +10,7 @@ public enum ExceptionCode {
     MEMBER_UNAUTHORIZED(401,"MEMBER_UNAUTHORIZED 인증되지 않음"),
     MEMBER_EXISTS(409, "MEMBER_EXISTS 이미 존재하는 회원"),
     NOT_IMPLEMENTATION(501, "Not Implementation 존재하지 않는 기능"),
-    PASSWORD_MISMATCHED(400,"PASSWORD_MISMATCHED 비밀번호가 일치하지 않음"),
+    PASSWORD_MISMATCHED(400,"PASSWORD_MISMATCHED 비밀번호가 일치하지 않거나 소셜 가입한 회원"),
     ID_MISMATCHED(400,"ID_MISMATCHED 아이디가 일치하지 않음"),
     MEMBER_ALREADY_DELETED(409, "MEMBER_ALREADY_DELETED 이미 탈퇴한 회원"),
     EMAIL_EXIST(409, "EMAIL_EXIST 이미 존재하는 이메일"),
