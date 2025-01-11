@@ -25,6 +25,7 @@ public class DiaryDto {
     @AllArgsConstructor
     @Getter
     public static class Patch {
+        private LocalDate date;
         @Size(min = 1, max = 30)
         private String title;
         @Size(max = 3000)
