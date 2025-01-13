@@ -117,6 +117,7 @@ public class DiaryService {
 
         verifiedRequest(findDiary.getMember().getMemberId(), memberId);
 
+        Optional.ofNullable(diary.getDate()).ifPresent(findDiary::setDate);
         Optional.ofNullable(diary.getTitle()).ifPresent(findDiary::setTitle);
         Optional.ofNullable(diary.getBody()).ifPresent(findDiary::setBody);
         Optional.ofNullable(diary.getImg()).ifPresent(findDiary::setImg);
