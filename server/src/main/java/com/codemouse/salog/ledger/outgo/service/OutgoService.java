@@ -7,6 +7,7 @@ import com.codemouse.salog.exception.BusinessLogicException;
 import com.codemouse.salog.exception.ExceptionCode;
 import com.codemouse.salog.helper.naverOcr.ClovaOcrApiService;
 import com.codemouse.salog.helper.naverOcr.ClovaOcrDto;
+import com.codemouse.salog.ledger.income.service.IncomeService;
 import com.codemouse.salog.ledger.outgo.dto.OutgoDto;
 import com.codemouse.salog.ledger.outgo.entity.Outgo;
 import com.codemouse.salog.ledger.outgo.mapper.OutgoMapper;
@@ -17,6 +18,7 @@ import com.codemouse.salog.tags.ledgerTags.dto.LedgerTagDto;
 import com.codemouse.salog.tags.ledgerTags.entity.LedgerTag;
 import com.codemouse.salog.tags.ledgerTags.repository.LedgerTagRepository;
 import com.codemouse.salog.tags.ledgerTags.service.LedgerTagService;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,6 +31,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -48,6 +51,7 @@ public class OutgoService {
     private final MemberService memberService;
     private final ClovaOcrApiService clovaOcrApiService;
 
+    private final IncomeService incomeService;  // 수입,지출 1년치 총합 그래프를 위한 의존성 주입
 
     // POST
     @Transactional
@@ -90,7 +94,7 @@ public class OutgoService {
         return outgoMapper.outgoToOutgoResponseDto(savedOutgo);
     }
 
-    // GET All List
+    // GET 월별 지출 조회시
     @Transactional
     public MultiResponseDto<OutgoDto.Response> findAllOutgos (String token, int page, int size, String date, String outgoTag){
         tokenBlackListService.isBlackListed(token);
@@ -104,7 +108,7 @@ public class OutgoService {
         return new MultiResponseDto<>(outgoDtoList, outgoPage);
     }
 
-    // 기간을 사용자가 커스텀하여 지출을 조회하는 메서드
+    // GET 기간을 사용자가 커스텀하여 지출을 조회하는 메서드
     public MultiResponseDto<OutgoDto.Response> findOutgosByDateRange(String token, int page, int size, String fromDate, String toDate, String outgoTag){
         tokenBlackListService.isBlackListed(token);
         Page<Outgo> outgoPage = findOutgoPages(token, page, size, null, fromDate, toDate, outgoTag, null);
@@ -116,7 +120,7 @@ public class OutgoService {
         return new MultiResponseDto<>(outgoDtoList, outgoPage);
     }
 
-    // GET WasteList
+    // GET 월별 낭비리스트 조회시
     public MultiResponseDto<OutgoDto.Response> findAllWasteLists(String token, int page, int size, String date, String outgoTag){
         tokenBlackListService.isBlackListed(token);
         Page<Outgo> wastePage = findOutgoPages(token, page, size, date, null, null, outgoTag, true);
@@ -128,7 +132,7 @@ public class OutgoService {
         return new MultiResponseDto<>(wasteDtoList, wastePage);
     }
 
-    // 기간을 사용자가 커스텀하여 낭비리스트를 조회하는 메서드
+    // GET 기간을 사용자가 커스텀하여 낭비리스트를 조회하는 메서드
     public MultiResponseDto<OutgoDto.Response> findWasteListsByDateRange(String token, int page, int size, String fromDate, String toDate, String outgoTag){
         tokenBlackListService.isBlackListed(token);
         Page<Outgo> wastePage = findOutgoPages(token, page, size, null, fromDate, toDate, outgoTag, true);
@@ -140,7 +144,7 @@ public class OutgoService {
         return new MultiResponseDto<>(wasteDtoList, wastePage);
     }
 
-    // GET Outgo Sum
+    // GET 월별 지출 총 합계 조회
     public OutgoDto.MonthlyResponse getSumOfOutgoLists(String token, String date){
         tokenBlackListService.isBlackListed(token);
         long memberId = jwtTokenizer.getMemberId(token);
@@ -166,7 +170,7 @@ public class OutgoService {
         return new OutgoDto.MonthlyResponse(monthlyOutgo, sumByTags);
     }
 
-    // GET WasteList Sum
+    // GET 월별 낭비리스트 총 합계 조회
     public OutgoDto.MonthlyResponse getSumOfWasteLists(String token, String date){
         tokenBlackListService.isBlackListed(token);
         long memberId = jwtTokenizer.getMemberId(token);
@@ -188,6 +192,43 @@ public class OutgoService {
                 sumByTags.stream().mapToLong(LedgerTagDto.MonthlyResponse::getTagSum).sum();
 
         return new OutgoDto.MonthlyResponse(monthlyWasteList, sumByTags);
+    }
+
+    // GET 연단위 월별 수입, 지출 총합계
+    public List<OutgoDto.YearlyResponse> getLedgerSumByMonth (String token, String date){
+        tokenBlackListService.isBlackListed(token);
+        long memberId = jwtTokenizer.getMemberId(token);
+
+        String[] dateParts = date.split("-");
+        int year = Integer.parseInt(dateParts[0]);
+        int month = Integer.parseInt(dateParts[1]);
+
+        // 1. date 포함 이전 12개월분의 날짜와 수입,지출의 총합계를 나타낼 것
+        // 2. 내림차순
+        List<OutgoDto.YearlyResponse> yearlyResponseList = new ArrayList<>();
+
+        // 12개월간의 수입, 지출 합계 계산
+        for (int i = 0; i < 12; i++) {
+            int currentYear = year;
+            int currentMonth = month - i;
+            if (currentMonth <= 0) {
+                currentYear -= 1;
+                currentMonth += 12;
+            }
+            String formattedDate = String.format("%d-%02d", currentYear, currentMonth); // YYYY-MM 형태로 포맷팅
+
+            // 수입 및 지출 월간 총합 데이터 조회
+            long monthlyIncome = incomeService.getMonthlyIncome(token, formattedDate).getMonthlyTotal();
+            long monthlyOutgo = Optional.ofNullable(
+                            outgoRepository.findTotalOutgoByMonth(memberId, currentYear, currentMonth))
+                    .orElse(0L);
+
+            yearlyResponseList.add(new OutgoDto.YearlyResponse(formattedDate, monthlyIncome, monthlyOutgo));
+        }
+
+        yearlyResponseList.sort((a, b) -> b.getDate().compareTo(a.getDate()));
+
+        return yearlyResponseList;
     }
 
     // DELETE
