@@ -90,6 +90,7 @@ public class OutgoServiceTest {
     *  4. 지출 합계 조회 - 월간 지출 합계 조회 (낭비리스트 조건)
     *                  - 연간 총 수입, 지출 통계 조회
     *  5. 지출 삭제
+    *  6. 기타 메서드 (보조 메서드, ocr관련 메서드)
     *
     *  + private메서드는 해당 메서드를 사용 중인  public메서드로 간접테스트 진행
     * */
@@ -100,7 +101,6 @@ public class OutgoServiceTest {
     *  3. createOutgo + InvalidYear : 연도 유효성 검사 실패
     *
     *  + 태그가 null인 조건은 dto에서 pattern 어노테이션 위반으로 통합테스트에서 테스트 진행
-    *
     * */
 
     @Test
@@ -629,7 +629,7 @@ public class OutgoServiceTest {
     * 2. 같은 이름의 태그를 공유하지 않고 단 1개의 지출만 있는 경우
     * 3. 예외 - 회원 검증 실패 시 예외 발생
     *
-    *  + 태그가 없거나 하나의 지출에 태그가 여러 개인 경우는 존재하지 않음
+    * + 태그가 없거나 하나의 지출에 태그가 여러 개인 경우는 존재하지 않음
     * */
 
     @Test
@@ -828,7 +828,7 @@ public class OutgoServiceTest {
     *  1. findOutgoPagesAsList 메서드는 private메서드 findOutgoPages를 오버로딩한 메서드로
     *     findOutgoPages는 findAllOutgos로 우회검증을 많이 하였음으로 제외.
     *
-    *  2. 테스트를 진행하며 outgoService 메서드에 개선사항이 보임
+    *  2. 테스트를 진행하며 outgoService 일부 메서드에 개선사항이 보임
     *  -> findOutgoPages 메서드는 페이지 생성 중복 코드를 통일시키려고 통합시켜놓은 메서드인데,
     *     하는 일이 방대하여 가독성을 해치고 단일 책임 원칙을 위반하고 있다고 판단함.
     *     일을 나눠서 메서드를 나눠줄 필요가 있어보임.
