@@ -24,7 +24,7 @@ public class OutgoController {
     private final OutgoService service;
 
     @PostMapping("/post")
-    public ResponseEntity<?> createOutgo (@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<?> postOutgo (@RequestHeader(name = "Authorization") String token,
                              @Valid @RequestBody OutgoDto.Post requestBody){
         OutgoDto.Response response = service.createOutgo(token, requestBody);
 
