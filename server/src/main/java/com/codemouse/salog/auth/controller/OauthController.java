@@ -24,6 +24,10 @@ import java.util.Map;
 public class OauthController {
     private final OauthService oauthService;
 
+    public OauthController(OauthService oauthService) {
+        this.oauthService = oauthService;
+    }
+
     @GetMapping("/login/oauth2/code/google")
     public void googleOauth2Callback(@RequestParam("code") String authCode, HttpServletResponse response) {
         try {
