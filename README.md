@@ -2,7 +2,7 @@
   
   ![Component 70](https://github.com/kimtjrgus/salog/assets/120611048/52114883-7a5f-43b0-8a3a-a26072be37a3)
 
-  ### 프로젝트 기간 : 2023.11.17 ~ 2023.02.24
+  ### 프로젝트 기간 : 2023.11.17 ~ 2024.02.24
 
   ### 배포링크 : <a href="http://www.salog.kro.kr" target="_blank">Salog</a>
 
